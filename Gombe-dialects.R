@@ -68,6 +68,24 @@ dialects %>%
   select_if(is.numeric) %>%
   skimr::skim()
 
+manual_numeric_features <- dialects %>% dplyr::select(manual_features) %>% dplyr::select_if(is.numeric)
+
+manual_numeric_features <- manual_numeric_features %>% dplyr::select(-contains(c("beats","drumming")), -Duration)
+
+View(manual_numeric_features %>% purrr::map_df(~sum(is.na(.))))
+
+manual_numeric_features <- manual_numeric_features %>% dplyr::select(-contains(c("rate", "Acceleration")))
+
+View(manual_numeric_features %>% purrr::map_df(~sum(is.na(.))))
+
+manual_numeric_features <- manual_numeric_features %>% 
+  add_column(Community = dialects$Community, Caller = dialects$Caller) %>% 
+  filter(complete.cases(.))
+
+manual_numeric_features %>% group_by(Community, Caller) %>% count
+
+manual_features_numeric <- names(manual_numeric_features)
+
 ########-------EXPLORATORY PLOTS-------########
 
 # SKIP TO LINE 380 FOR ANALYSIS)
@@ -381,26 +399,12 @@ dialects %>%
 
 ##PCA on structural features and plot
 
-manual_numeric_features <- dialects %>% dplyr::select(manual_features) %>% dplyr::select_if(is.numeric)
-
-manual_numeric_features <- manual_numeric_features %>% dplyr::select(-contains(c("beats","drumming")))
-
-View(manual_numeric_features %>% purrr::map_df(~sum(is.na(.))))
-
-manual_numeric_features <- manual_numeric_features %>% dplyr::select(-contains(c("rate", "Acceleration")))
-
-View(manual_numeric_features %>% purrr::map_df(~sum(is.na(.))))
-
-manual_numeric_features <- manual_numeric_features %>% add_column(Community = dialects$Community, Caller = dialects$Caller)
-
-manual_numeric_features_complete <- manual_numeric_features[complete.cases(manual_numeric_features),]
-
-pca<-princomp(manual_numeric_features_complete[,1:11], cor=TRUE)
+pca_manual_numeric_features <- princomp(manual_numeric_features[,1:11], cor=TRUE)
 
 library(devtools)
 install_github("vqv/ggbiplot")
 library(ggbiplot) #See below for descriptions of these commands.
-g <- ggbiplot(pca, choices = 1:2, obs.scale=1, var.scale=1, groups=manual_numeric_features_complete$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g <- ggbiplot(pca_manual_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=manual_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
 g <- g + scale_color_discrete(name = '')
 g <- g + ggtitle("PCA on structural features of pant-hoots")+
          theme(legend.direction = 'horizontal', 
@@ -423,11 +427,11 @@ buildup_numeric_features <- dialects %>%
   dplyr::select(-durat2) %>% 
   add_column(Community = dialects$Community, Individual = dialects$Caller)
 
-buildup_numeric_features_complete <- buildup_numeric_features[complete.cases(buildup_numeric_features),]
+buildup_numeric_features <- buildup_numeric_features %>% filter(complete.cases(.))
 
-pca2<-princomp(buildup_numeric_features_complete[,1:24], cor=TRUE)
+pca_buildup_numeric_features <- princomp(buildup_numeric_features[,1:24], cor=TRUE)
 
-g1 <- ggbiplot(pca2, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features_complete$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g1 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
 g1 <- g1 + scale_color_discrete(name = '')
 g1 <- g1 + ggtitle("PCA on acoustic features of buildups")+
   theme(legend.direction = 'horizontal', 
@@ -448,11 +452,11 @@ climax_numeric_features <- dialects %>%
   dplyr::select(-durat2_1) %>% 
   add_column(Community = dialects$Community, Individual = dialects$Caller)
 
-climax_numeric_features_complete <- climax_numeric_features[complete.cases(climax_numeric_features),]
+climax_numeric_features <-  climax_numeric_features %>% filter(complete.cases(.))
 
-pca3<-princomp(climax_numeric_features_complete[,1:24], cor=TRUE)
+pca_climax_numeric_features <- princomp(climax_numeric_features[,1:24], cor=TRUE)
 
-g2 <- ggbiplot(pca3, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features_complete$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
 g2 <- g2 + scale_color_discrete(name = '')
 g2 <- g2 + ggtitle("PCA on acoustic features of climax screams")+
   theme(legend.direction = 'horizontal', 
@@ -466,114 +470,246 @@ g2 <- g2 + ggtitle("PCA on acoustic features of climax screams")+
 g2
 
 
-
-
-library(lme4)
-
-
-mod <-glmer(Community ~ . -Individual + (1|Individual), data = climax_numeric_features_complete, family = binomial)
-
-# More data cleaning
-manual_features <- colnames(dialects)[1:36]
-buildup_features <- colnames(dialects)[37:63]
-climax_features <- colnames(dialects)[64:90]
-
-manual_features_chosen <- c("Community", "Caller", "Context", "Duration (B to L)", "Buildup present", 
-                            "Buildup E components", "Buildup first half", "Buildup second half", 
-                            "Buildup duration", "Rate of buildup", "Rate of first half",
-                            "Rate of second half", "Acceleration",
-                            "Climax present", "Climax components", "Climax screams", "Prop of screams",
-                            "Durclx", "Letdown present", "Letdown components") 
-
-dialects_manual <- dialects %>% 
-  dplyr::select(manual_features_chosen)
-dialects_manual_2 <- dialects_manual %>% mutate_if(is.character, as.factor)
-
-# Impute missing values
-
-library(randomForest)
-Community <- dialects_manual_2$Community
-Individual <- dialects_manual_2$Caller
-
-# Impute missing data with rfImpute procedure based on Individual level averages
-dialects_manual_imputed <- rfImpute(dialects_manual_2[,4:20], Individual)
-Imputed_individual$Individual <- pdfa_data$Caller
-Imputed_individual_gombe <- Imputed_individual[pdfa_data$Community != "Kanyawara",]
-Imputed_individual_gombe <- droplevels(Imputed_individual_gombe)
-
-# Data cleaning for pDFA
-
 ######----pDFAs-----###### 
 
-# pDFA FOR CONTEXT
+#######------pDFA FOR CONTEXT------#######
 source("~/Desktop/Nisarg files/Dialects/rercodeforpdfa/pdfa_functions.r")
-pdfa_data_context <- 
-  dialects %>% dplyr::select(Community, Caller, Context, climax_features, -call_1, -durat2_1, -select_1, -noise_mean_1, -noise_max_1, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+
+
+
+# ON CLIMAXES
+
+pdfa_data_context_climaxes <- 
+  dialects %>% dplyr::select(Community, Caller, Context, climax_features, -call_1, -durat2_1, -select_1) %>%  ##, -noise_mean_1, -noise_max_1, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
   filter(!is.na(duration_1), !is.na(Context))
 
-pdfa_data_context <- pdfa_data_context %>% filter(Context != "Display", Context != "Resting")
+pdfa_data_context_climaxes <- pdfa_data_context_climaxes %>% filter(Context != "Display", Context != "Resting")
 
-View(pdfa_data_context %>% group_by(Context, Caller) %>% count())
+View(pdfa_data_context_climaxes %>% group_by(Context, Caller) %>% count())
 
-number_by_caller <- pdfa_data_context %>% group_by(Context, Caller) %>% summarise(calls = n())
+number_by_caller_climaxes <- pdfa_data_context_climaxes %>% group_by(Context, Caller) %>% summarise(calls = n())
 
-pdfa_data_context <- pdfa_data_context %>% 
-  filter(!(Caller %in% number_by_caller[number_by_caller$calls < 3,]$Caller))
+pdfa_data_context_climaxes <- pdfa_data_context_climaxes %>% 
+  filter(!(Caller %in% number_by_caller_climaxes[number_by_caller_climaxes$calls < 3,]$Caller))
 
-pdfa_data_context <- pdfa_data_context %>% 
+pdfa_data_context_climaxes <- pdfa_data_context_climaxes %>% 
   filter(!Caller %in% c("LON", "LAM", "PG", "TJ")) # Do only LON for a sample size of 12.
 
-View(pdfa_data_context %>% group_by(Context, Caller) %>% count())
+View(pdfa_data_context_climaxes %>% group_by(Context, Caller) %>% count())
 
-pdfa_data_context %>% mutate_if(is.numeric, scale) %>% 
+pdfa_data_context_climaxes %>% #mutate_if(is.numeric, scale) %>%
   select_if(is.numeric) %>%
   skimr::skim()
 
-pdfa_data_context_scaled <- pdfa_data_context %>% mutate_if(is.numeric, scale)
-
-vars <- names(pdfa_data[,4:19])
+# pdfa_data_context_scaled <- pdfa_data_context %>% mutate_if(is.numeric, scale)
 
 
+pdfa_data_context_climaxes %>% group_by(Context) %>% count
 
-pdfa_context=pDFA.crossed(test.fac="Context", contr.fac="Caller",
-                      variables=vars, n.to.sel=NULL,
-                      n.sel=100, n.perm=1000, pdfa.data=pdfa_data_context_scaled)
-pdfa_context
+vars_pdfa_context_climaxes <- names(pdfa_data_context_climaxes[,4:27])
 
-# pDFA FOR COMMUNITY
+pdfa_context_climaxes=pDFA.crossed(test.fac="Context", contr.fac="Caller",
+                      variables=vars_pdfa_context_climaxes, n.to.sel=NULL,
+                      n.sel=100, n.perm=1000, 
+                      pdfa.data=as.data.frame(pdfa_data_context_climaxes))
+pdfa_context_climaxes
 
-pdfa_data_community <- 
-  dialects %>% dplyr::select(Community, Caller, Context, climax_features, -call_1, -durat2_1, -select_1, -noise_mean_1, -noise_max_1) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+# ON CLIMAXES OF GOMBE
+
+pdfa_data_context_climaxes_gombe <- pdfa_data_context_climaxes %>% filter(Community != "Kanyawara")
+
+pdfa_data_context_climaxes_gombe %>% group_by(Context, Caller) %>% count
+
+pca_pdfa_context_climaxes_gombe <- princomp(pdfa_data_context_climaxes_gombe[,4:27], cor = T)
+summary(pca_pdfa_context_climaxes_gombe)
+
+pca_scores_pdfa_context_climaxes_gombe <- as_tibble(pca_pdfa_context_climaxes_gombe$scores)
+
+pca_scores_pdfa_context_climaxes_gombe <- pca_scores_pdfa_context_climaxes_gombe %>%
+  add_column(Community = pdfa_data_context_climaxes_gombe$Community, Caller = pdfa_data_context_climaxes_gombe$Caller,
+             Context = pdfa_data_context_climaxes_gombe$Context)
+
+vars_pdfa_context_climaxes_gombe <- names(pca_scores_pdfa_context_climaxes_gombe[,1:20])
+
+pdfa_context_climaxes_gombe=pDFA.crossed(test.fac="Context", contr.fac="Caller",
+                                         variables=vars_pdfa_context_climaxes_gombe, n.to.sel=NULL,
+                                         n.sel=100, n.perm=1000, 
+                                         pdfa.data=as.data.frame(pca_scores_pdfa_context_climaxes_gombe))
+pdfa_context_climaxes_gombe
+
+
+# ON BUILDUPS
+
+pdfa_data_context_buildups <- 
+  dialects %>% dplyr::select(Community, Caller, Context, buildup_features, -call, -durat2, -select) %>%  ##, -noise_mean_1, -noise_max_1, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  filter(!is.na(duration), !is.na(Context))
+
+pdfa_data_context_buildups <- pdfa_data_context_buildups %>% filter(Context != "Display", Context != "Resting")
+
+View(pdfa_data_context_buildups %>% group_by(Context, Caller) %>% count())
+
+number_by_caller_buildups <- pdfa_data_context_buildups %>% group_by(Context, Caller) %>% summarise(calls = n())
+
+pdfa_data_context_buildups <- pdfa_data_context_buildups %>% 
+  filter(!(Caller %in% number_by_caller_buildups[number_by_caller_buildups$calls < 3,]$Caller))
+
+pdfa_data_context_buildups <- pdfa_data_context_buildups %>% 
+  filter(!Caller %in% c("LON"))
+
+pdfa_data_context_buildups %>% group_by(Context, Caller) %>% count
+
+pdfa_data_context_buildups %>% #mutate_if(is.numeric, scale) %>%
+  select_if(is.numeric) %>%
+  skimr::skim()
+
+# pdfa_data_context_scaled <- pdfa_data_context %>% mutate_if(is.numeric, scale)
+
+
+pdfa_data_context_buildups %>% group_by(Context) %>% count
+
+vars_pdfa_context_buildups <- names(pdfa_data_context_buildups[,4:27])
+
+pdfa_context_buildups=pDFA.crossed(test.fac="Context", contr.fac="Caller",
+                                   variables=vars_pdfa_context_buildups, n.to.sel=NULL,
+                                   n.sel=100, n.perm=1000, 
+                                   pdfa.data=as.data.frame(pdfa_data_context_buildups))
+pdfa_context_buildups
+
+# ON BUILDPS OF GOMBE
+
+pdfa_data_context_buildups_gombe <- pdfa_data_context_buildups %>% filter(Community != "Kanyawara")
+
+pdfa_data_context_buildups_gombe %>% group_by(Context) %>% count
+
+pca_pdfa_context_buildups_gombe <- princomp(pdfa_data_context_buildups_gombe[,4:27], cor = T)
+summary(pca_pdfa_context_buildups_gombe)
+
+pca_scores_pdfa_context_buildups_gombe <- as_tibble(pca_pdfa_context_buildups_gombe$scores)
+
+pca_scores_pdfa_context_buildups_gombe <- pca_scores_pdfa_context_buildups_gombe %>%
+  add_column(Community = pdfa_data_context_buildups_gombe$Community, Caller = pdfa_data_context_buildups_gombe$Caller,
+             Context = pdfa_data_context_buildups_gombe$Context)
+
+vars_pdfa_context_buildups_gombe <- names(pca_scores_pdfa_context_buildups_gombe[,1:20])
+
+pdfa_context_buildups_gombe=pDFA.crossed(test.fac="Context", contr.fac="Caller",
+                                   variables=vars_pdfa_context_buildups_gombe, n.to.sel=NULL,
+                                   n.sel=100, n.perm=1000, 
+                                   pdfa.data=as.data.frame(pca_scores_pdfa_context_buildups_gombe))
+pdfa_context_buildups_gombe
+
+# ON COMPLETE CALLS
+
+pdfa_data_context_complete <- 
+  complete_calls %>% dplyr::select(Community, Caller, Context, manual_features_numeric, buildup_features, climax_features, -call, -durat2, -select, -call_1, -durat2_1, -select_1) %>%  ##, -noise_mean_1, -noise_max_1, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  filter(complete.cases(.))
+
+pdfa_data_context_complete <- pdfa_data_context_complete %>% filter(Context != "Display", Context != "Resting")
+
+View(pdfa_data_context_complete %>% group_by(Context, Caller) %>% count())
+
+number_by_caller_complete <- pdfa_data_context_complete %>% group_by(Context, Caller) %>% summarise(calls = n())
+
+pdfa_data_context_complete <- pdfa_data_context_complete %>% 
+  filter(!(Caller %in% number_by_caller_complete[number_by_caller_complete$calls < 3,]$Caller))
+
+pdfa_data_context_complete <- pdfa_data_context_complete %>% 
+  filter(!Caller %in% c("LON"))
+
+pdfa_data_context_complete %>% group_by(Context, Caller) %>% count
+
+pdfa_data_context_complete %>% #mutate_if(is.numeric, scale) %>%
+  select_if(is.numeric) %>%
+  skimr::skim()
+
+# pdfa_data_context_scaled <- pdfa_data_context %>% mutate_if(is.numeric, scale)
+
+
+pdfa_data_context_complete %>% group_by(Context) %>% count
+
+pca_pdfa_context_complete <- princomp(pdfa_data_context_complete[,4:61], cor = TRUE)
+summary(pca_pdfa_context_complete)
+
+pca_scores_pdfa_context_complete <- as_tibble(pca_pdfa_context_complete$scores) 
+
+pca_scores_pdfa_context_complete <- pca_scores_pdfa_context_complete %>% add_column(Caller = pdfa_data_context_complete$Caller, Context = pdfa_data_context_complete$Context, Community = pdfa_data_context_complete$Community)
+
+screeplot(pca_pdfa_context_complete, npcs = 50, type = "lines")
+
+vars_pdfa_context_complete <- names(pca_scores_pdfa_context_complete[,1:35])
+
+pdfa_context_complete=pDFA.crossed(test.fac="Context", contr.fac="Caller",
+                                   variables=vars_pdfa_context_complete, n.to.sel=NULL,
+                                   n.sel=100, n.perm=1000, 
+                                   pdfa.data=as.data.frame(pca_scores_pdfa_context_complete))
+pdfa_context_complete
+
+# ON COMPLETE CALLS OF GOMBE-- CAN'T BE DONE
+
+pdfa_data_context_complete_gombe <- pdfa_data_context_complete %>% filter(Community != "Kanyawara")
+
+pdfa_data_context_complete_gombe %>% group_by(Context) %>% count
+
+pca_pdfa_context_complete_gombe <- princomp(pdfa_data_context_complete_gombe[,4:61], cor = T)
+summary(pca_pdfa_context_complete_gombe)
+
+pca_scores_pdfa_context_complete_gombe <- as_tibble(pca_pdfa_context_complete_gombe$scores)
+
+pca_scores_pdfa_context_complete_gombe <- pca_scores_pdfa_context_complete_gombe %>%
+  add_column(Community = pdfa_data_context_complete_gombe$Community, Caller = pdfa_data_context_buildups_gombe$Caller,
+             Context = pdfa_data_context_complete_gombe$Context)
+
+vars_pdfa_context_complete_gombe <- names(pca_scores_pdfa_context_complete_gombe[,1:20])
+
+pdfa_context_complete_gombe=pDFA.crossed(test.fac="Context", contr.fac="Caller",
+                                         variables=vars_pdfa_context_complete_gombe, n.to.sel=NULL,
+                                         n.sel=100, n.perm=1000, 
+                                         pdfa.data=as.data.frame(pca_scores_pdfa_context_complete_gombe))
+pdfa_context_complete_gombe
+
+
+#######------pDFA FOR COMMUNITY-----#######
+
+# ON CLIMAXES
+
+pdfa_data_community_climaxes <- 
+  dialects %>% dplyr::select(Community, Caller, Context, climax_features, -call_1, -durat2_1, -select_1) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
   filter(!is.na(duration_1), !is.na(Context))
 
-pdfa_data_community %>% 
+pdfa_data_community_climaxes %>% 
   select_if(is.numeric) %>%
   skimr::skim()
 
-vars_pdfa_community <- names(pdfa_data_community[,4:25])
+pdfa_data_community_climaxes %>% group_by(Community) %>% count
+pdfa_data_community_climaxes %>% group_by(Community, Caller) %>% count
 
-pdfa_community <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
-                        variables=vars_pdfa_community, 
+vars_pdfa_community_climaxes <- names(pdfa_data_community_climaxes[,4:27])
+
+pdfa_community_climaxes <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
+                        variables=vars_pdfa_community_climaxes, 
                         restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                         n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                        pdfa.data=pdfa_data_community)
+                        pdfa.data=as.data.frame(pdfa_data_community_climaxes))
+pdfa_community_climaxes
 
-pdfa_data_community_gombe <- pdfa_data_community %>% 
+# ON CLIMAXES OF GOMBE
+
+pdfa_data_community_climaxes_gombe <- pdfa_data_community_climaxes %>% 
   filter(Community != "Kanyawara")
 
-pdfa_data_community_gombe %>% group_by(Community, Caller) %>% count()
+pdfa_data_community_climaxes_gombe %>% group_by(Community, Caller) %>% count()
 
-pdfa_community_gombe <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
-                              variables=vars_pdfa_community, 
+pdfa_community_climaxes_gombe <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
+                              variables=vars_pdfa_community_climaxes, 
                               restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                               n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                              pdfa.data=pdfa_data_community_gombe)
-pdfa_community_gombe
+                              pdfa.data=as.data.frame(pdfa_data_community_climaxes_gombe))
+pdfa_community_climaxes_gombe
 
 # ON BUILDUPS
 
 pdfa_data_community_buildups <- 
-  dialects %>% dplyr::select(Community, Caller, Context, buildup_features, -call, -durat2, -select, -noise_mean, -noise_max) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  dialects %>% dplyr::select(Community, Caller, Context, buildup_features, -call, -durat2, -select) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
   filter(!is.na(duration), !is.na(Context))
 
 pdfa_data_community_buildups %>% group_by(Community, Caller) %>% count
@@ -584,31 +720,33 @@ pdfa_data_community_buildups %>%
   select_if(is.numeric) %>%
   skimr::skim()
 
-vars_pdfa_community_buildups <- names(pdfa_data_community_buildups[,4:25])
+vars_pdfa_community_buildups <- names(pdfa_data_community_buildups[,4:27])
 
 pdfa_community_buildups <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                               variables=vars_pdfa_community_buildups, 
                               restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                               n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                              pdfa.data=pdfa_data_community_buildups)
+                              pdfa.data=as.data.frame(pdfa_data_community_buildups))
 pdfa_community_buildups
+
+# ON BUILDUPS OF GOMBE
 
 pdfa_data_community_buildups_gombe <- pdfa_data_community_buildups %>% 
   filter(Community != "Kanyawara")
 
-pdfa_data_community_buildups_gombe %>% group_by(Community, Caller) %>% count()
+pdfa_data_community_buildups_gombe %>% group_by(Community) %>% count()
 
 pdfa_community_buildups_gombe <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                                     variables=vars_pdfa_community_buildups, 
                                     restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                                     n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                                    pdfa.data=pdfa_data_community_buildups_gombe)
+                                    pdfa.data=as.data.frame(pdfa_data_community_buildups_gombe))
 pdfa_community_buildups_gombe
 
 # ON COMPLETE CALLS
 
 pdfa_data_community_complete <- 
-  complete_calls %>% dplyr::select(Community, Caller, Context, buildup_features, climax_features, -call, -durat2, -select, -noise_mean, -noise_max, -call_1, -durat2_1, -select_1, -noise_mean_1, -noise_max_1) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  complete_calls %>% dplyr::select(Community, Caller, Context, manual_features_numeric, buildup_features, climax_features, -call, -durat2, -select, -call_1, -durat2_1, -select_1) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
   filter(!is.na(duration), !is.na(Context))
 
 pdfa_data_community_complete %>% group_by(Community, Caller) %>% count
@@ -619,51 +757,240 @@ pdfa_data_community_complete %>%
   select_if(is.numeric) %>%
   skimr::skim()
 
-vars_pdfa_community_complete <- names(pdfa_data_community_complete[,4:47])
+pca_pdfa_community_complete <- princomp(pdfa_data_community_complete[,4:51], cor = T)
+summary(pca_pdfa_community_complete)
+
+pca_scores_pdfa_community_complete <- as_tibble(pca_pdfa_community_complete$scores)
+pca_scores_pdfa_community_complete <- pca_scores_pdfa_community_complete %>% 
+  add_column(Community = pdfa_data_community_complete$Community, Caller = pdfa_data_community_complete$Caller,
+             Context = pdfa_data_community_complete$Context)
+
+
+vars_pdfa_community_complete <- names(pca_scores_pdfa_community_complete[,1:35])
 
 pdfa_community_complete <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                                        variables=vars_pdfa_community_complete, 
                                        restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                                        n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                                       pdfa.data=pdfa_data_community_complete)
+                                       pdfa.data=as.data.frame(pca_scores_pdfa_community_complete))
 pdfa_community_complete
+
+# ON COMPLETE CALLS OF GOMBE
 
 pdfa_data_community_complete_gombe <- pdfa_data_community_complete %>% 
   filter(Community != "Kanyawara")
 
-pdfa_data_community_complete_gombe %>% group_by(Community) %>% count()
+pdfa_data_community_complete_gombe %>% group_by(Community, Caller) %>% count()
+
+pdfa_data_community_complete_gombe <- pdfa_data_community_complete_gombe %>% filter(Caller != "ZS")
+
+
+pca_pdfa_community_complete_gombe <- princomp(pdfa_data_community_complete_gombe[,4:51], cor = T)
+summary(pca_pdfa_community_complete_gombe)
+
+pca_scores_pdfa_community_complete_gombe <- as_tibble(pca_pdfa_community_complete_gombe$scores)
+pca_scores_pdfa_community_complete_gombe <- pca_scores_pdfa_community_complete_gombe %>% 
+  add_column(Community = pdfa_data_community_complete_gombe$Community, Caller = pdfa_data_community_complete_gombe$Caller,
+             Context = pdfa_data_community_complete_gombe$Context)
+
+
+vars_pdfa_community_complete_gombe <- names(pca_scores_pdfa_community_complete_gombe[,1:35])
+
+
 
 pdfa_community_complete_gombe <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
-                                             variables=vars_pdfa_community_complete, 
+                                             variables=vars_pdfa_community_complete_gombe, 
                                              restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                                              n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                                             pdfa.data=pdfa_data_community_complete_gombe)
+                                             pdfa.data=as.data.frame(pca_scores_pdfa_community_complete_gombe))
 pdfa_community_complete_gombe
 
 
 
-# pDFA FOR INDIVIDUAL
+#######------pDFA FOR INDIVIDUAL----######
 
-pdfa_data_individual <- 
-  dialects %>% dplyr::select(Community, Caller, Context, climax_features, -Pfmin_1, -call_1, -durat2_1, -select_1, -noise_mean_1, -noise_max_1, -trfak_1, -Pfmaxamp_1, -Pfminamp_1, -Pfmaxloc_1, -Pfminloc_1, -Pfmaxdif_1, -F0start_1, -trmean_1, -trmax_1, -lmmean_1, -lmmax_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+# ON CLIMAXES
+
+pdfa_data_individual_climaxes <- 
+  dialects %>% dplyr::select(Community, Caller, Context, climax_features, -call_1, -durat2_1, -select_1) %>%     # -noise_mean_1, -noise_max_1, -trfak_1, -Pfmaxamp_1, -Pfminamp_1, -Pfmaxloc_1, -Pfminloc_1, -Pfmaxdif_1, -F0start_1, -trmean_1, -trmax_1, -lmmean_1, -lmmax_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
   filter(!is.na(duration_1), !is.na(Context))
 
-pdfa_data_individual %>% 
+pdfa_data_individual_climaxes %>% 
   select_if(is.numeric) %>%
   skimr::skim()
 
-vars <- names(pdfa_data_individual[,4:10])
+pdfa_data_individual_climaxes %>% group_by(Caller) %>% count
 
-View(pdfa_data_individual %>% group_by(Caller) %>% count())
+pca_pdfa_individual_climaxes <- princomp(pdfa_data_individual_climaxes[,4:27], cor = T)
+summary(pca_pdfa_individual_climaxes)
+screeplot(pca_pdfa_individual_climaxes, npcs = 10,type = "lines")
 
-pdfa.ind <- pDFA.nested(test.fac="Caller", contr.fac = NULL,
-                        variables=vars, 
-                        restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
-                        n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                        pdfa.data=pdfa_data_individual)
-pdfa.ind
+pca_scores_pdfa_individual_climaxes <- as_tibble(pca_pdfa_individual_climaxes$scores)
+pca_scores_pdfa_individual_climaxes <- pca_scores_pdfa_individual_climaxes %>% 
+  add_column(Community = pdfa_data_individual_climaxes$Community, Caller = pdfa_data_individual_climaxes$Caller,
+             Context = pdfa_data_individual_climaxes$Context)
 
-##-----------------------------###---------------###------------##
+vars_pdfa_individual_climaxes <- names(pca_scores_pdfa_individual_climaxes[,1:8])
+
+pdfa_individual_climaxes <- pDFA.nested(test.fac="Caller",
+                                        variables=vars_pdfa_individual_climaxes, 
+                                        restrict.by="Community", n.contr.fac.levels.to.sel=NULL, n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
+                                        pdfa.data=as.data.frame(pca_scores_pdfa_individual_climaxes))
+pdfa_individual_climaxes
+
+# ON CLIMAXES OF GOMBE
+
+pdfa_data_individual_climaxes_gombe <- pdfa_data_individual_climaxes %>% 
+  filter(Community != "Kanyawara")
+
+pdfa_data_individual_climaxes_gombe %>% group_by(Community, Caller) %>% count()
+
+pca_pdfa_individual_climaxes_gombe <- princomp(pdfa_data_individual_climaxes_gombe[,4:27], cor = T)
+summary(pca_pdfa_individual_climaxes_gombe)
+
+pca_scores_pdfa_individual_climaxes_gombe <- as_tibble(pca_pdfa_individual_climaxes_gombe$scores)
+pca_scores_pdfa_individual_climaxes_gombe <- pca_scores_pdfa_individual_climaxes_gombe %>% 
+  add_column(Community = pdfa_data_individual_climaxes_gombe$Community, Caller = pdfa_data_individual_climaxes_gombe$Caller,
+             Context = pdfa_data_individual_climaxes_gombe$Context)
+
+
+vars_pdfa_individual_climaxes_gombe <- names(pca_scores_pdfa_individual_climaxes_gombe[,1:8])
+
+pdfa_individual_climaxes_gombe <- pDFA.nested(test.fac="Caller",
+                                        variables=vars_pdfa_individual_climaxes_gombe, 
+                                        restrict.by="Community", n.contr.fac.levels.to.sel=NULL, n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
+                                        pdfa.data=as.data.frame(pca_scores_pdfa_individual_climaxes_gombe))
+pdfa_individual_climaxes_gombe
+
+# ON BUILDUPS
+
+pdfa_data_individual_buildups <- 
+  dialects %>% dplyr::select(Community, Caller, Context, buildup_features, -call, -durat2, -select) %>%     # -noise_mean_1, -noise_max_1, -trfak_1, -Pfmaxamp_1, -Pfminamp_1, -Pfmaxloc_1, -Pfminloc_1, -Pfmaxdif_1, -F0start_1, -trmean_1, -trmax_1, -lmmean_1, -lmmax_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  filter(!is.na(duration), !is.na(Context))
+
+pdfa_data_individual_buildups %>% 
+  select_if(is.numeric) %>%
+  skimr::skim()
+
+pdfa_data_individual_buildups %>% group_by(Caller) %>% count
+
+pdfa_data_individual_buildups <- pdfa_data_individual_buildups %>% 
+  filter(Caller != "FAN")
+
+pca_pdfa_individual_buildups <- princomp(pdfa_data_individual_buildups[,4:27], cor = T)
+summary(pca_pdfa_individual_buildups)
+screeplot(pca_pdfa_individual_buildups, npcs = 10,type = "lines")
+
+pca_scores_pdfa_individual_buildups <- as_tibble(pca_pdfa_individual_buildups$scores)
+pca_scores_pdfa_individual_buildups <- pca_scores_pdfa_individual_buildups %>% 
+  add_column(Community = pdfa_data_individual_buildups$Community, Caller = pdfa_data_individual_buildups$Caller,
+             Context = pdfa_data_individual_buildups$Context)
+
+vars_pdfa_individual_buildups <- names(pca_scores_pdfa_individual_buildups[,1:5])
+
+pdfa_individual_buildups <- pDFA.nested(test.fac="Caller",
+                                        variables=vars_pdfa_individual_buildups, 
+                                        restrict.by="Community", n.contr.fac.levels.to.sel=NULL, n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
+                                        pdfa.data=as.data.frame(pca_scores_pdfa_individual_buildups))
+pdfa_individual_buildups
+
+# ON BUILDUPS OF GOMBE
+
+pdfa_data_individual_buildups_gombe <- pdfa_data_individual_buildups %>% 
+  filter(Community != "Kanyawara")
+
+pdfa_data_individual_buildups_gombe %>% group_by(Community, Caller) %>% count()
+
+pca_pdfa_individual_buildups_gombe <- princomp(pdfa_data_individual_buildups_gombe[,4:27], cor = T)
+summary(pca_pdfa_individual_buildups_gombe)
+
+pca_scores_pdfa_individual_buildups_gombe <- as_tibble(pca_pdfa_individual_buildups_gombe$scores)
+pca_scores_pdfa_individual_buildups_gombe <- pca_scores_pdfa_individual_buildups_gombe %>% 
+  add_column(Community = pdfa_data_individual_buildups_gombe$Community, Caller = pdfa_data_individual_buildups_gombe$Caller,
+             Context = pdfa_data_individual_buildups_gombe$Context)
+
+
+vars_pdfa_individual_buildups_gombe <- names(pca_scores_pdfa_individual_buildups_gombe[,1:5])
+
+pdfa_individual_buildups_gombe <- pDFA.nested(test.fac="Caller",
+                                              variables=vars_pdfa_individual_buildups_gombe, 
+                                              restrict.by="Community", n.contr.fac.levels.to.sel=NULL, n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
+                                              pdfa.data=as.data.frame(pca_scores_pdfa_individual_buildups_gombe))
+pdfa_individual_buildups_gombe
+
+
+# ON COMPLETE CALLS
+
+pdfa_data_individual_complete <- 
+  complete_calls %>% dplyr::select(Community, Caller, Context, manual_features_numeric, buildup_features, climax_features, -call, -durat2, -select, -call_1, -durat2_1, -select_1) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  filter(!is.na(duration), !is.na(Context))
+
+pdfa_data_individual_complete %>% group_by(Community, Caller) %>% count
+
+pdfa_data_individual_complete <- pdfa_data_individual_complete %>% filter(!Caller %in% c("FAN", "ZS"))
+
+
+pdfa_data_individual_complete <- pdfa_data_individual_complete %>% 
+  filter(complete.cases(.))
+
+pdfa_data_individual_complete %>% group_by(Community, Caller) %>% count
+
+pdfa_data_individual_complete %>% 
+  select_if(is.numeric) %>%
+  skimr::skim()
+
+pca_pdfa_individual_complete <- princomp(pdfa_data_individual_complete[,4:61], cor = T)
+summary(pca_pdfa_individual_complete)
+screeplot(pca_pdfa_individual_complete, type = "lines")
+
+pca_scores_pdfa_individual_complete <- as_tibble(pca_pdfa_individual_complete$scores)
+pca_scores_pdfa_individual_complete <- pca_scores_pdfa_individual_complete %>% 
+  add_column(Community = pdfa_data_individual_complete$Community, Caller = pdfa_data_individual_complete$Caller,
+             Context = pdfa_data_individual_complete$Context)
+
+
+vars_pdfa_individual_complete <- names(pca_scores_pdfa_individual_complete[,1:4])
+
+pdfa_individual_complete <- pDFA.nested(test.fac="Caller",
+                                       variables=vars_pdfa_individual_complete, 
+                                       restrict.by="Community", n.contr.fac.levels.to.sel=NULL, 
+                                       n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
+                                       pdfa.data=as.data.frame(pca_scores_pdfa_individual_complete))
+pdfa_individual_complete
+
+# ON COMPLETE CALLS OF GOMBE
+
+pdfa_data_individual_complete_gombe <- pdfa_data_individual_complete %>% 
+  filter(Community != "Kanyawara")
+
+pdfa_data_individual_complete_gombe %>% group_by(Community, Caller) %>% count()
+
+
+pca_pdfa_individual_complete_gombe <- princomp(pdfa_data_individual_complete_gombe[,4:61], cor = T)
+summary(pca_pdfa_individual_complete_gombe)
+screeplot(pca_pdfa_individual_complete_gombe, type = "lines")
+
+pca_scores_pdfa_individual_complete_gombe <- as_tibble(pca_pdfa_individual_complete_gombe$scores)
+pca_scores_pdfa_individual_complete_gombe <- pca_scores_pdfa_individual_complete_gombe %>% 
+  add_column(Community = pdfa_data_individual_complete_gombe$Community, Caller = pdfa_data_individual_complete_gombe$Caller,
+             Context = pdfa_data_individual_complete_gombe$Context)
+
+
+vars_pdfa_individual_complete_gombe <- names(pca_scores_pdfa_individual_complete_gombe[,1:4])
+
+
+
+pdfa_individual_complete_gombe <- pDFA.nested(test.fac="Caller",
+                                             variables=vars_pdfa_individual_complete_gombe, 
+                                             restrict.by="Community", n.contr.fac.levels.to.sel=NULL, 
+                                             n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
+                                             pdfa.data=as.data.frame(pca_scores_pdfa_individual_complete_gombe))
+pdfa_individual_complete_gombe
+
+
+
+
+########-----------#######---------------###------------#######
 
 
 library(randomForest)
