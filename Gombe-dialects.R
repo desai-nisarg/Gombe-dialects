@@ -455,7 +455,7 @@ pca_buildup_numeric_features <- princomp(buildup_numeric_features[,1:24], cor=TR
 pca_buildup_numeric_features_context <- princomp(buildup_numeric_features_context[,1:24], cor=TRUE)
 
 g3.1 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.1 <- g3.1 + #ggtitle("PCA on acoustic features of buildups")+
+g3.1 <- g3.1 + ggtitle("(a) Build-ups")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=buildup_numeric_features$Community, shape=buildup_numeric_features$Community), size = 3) +
@@ -466,7 +466,7 @@ g3.1 <- g3.1 + #ggtitle("PCA on acoustic features of buildups")+
         legend.position = 'none', 
         legend.text=element_text(size=14),
         legend.title=element_blank(),
-        plot.title = element_text(size=18, hjust = 0.5),
+        plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -474,7 +474,7 @@ g3.1 <- g3.1 + #ggtitle("PCA on acoustic features of buildups")+
 g3.1
 
 g2.1 <- ggbiplot(pca_buildup_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2.1 <- g2.1 + #ggtitle("PCA on acoustic features of buildups")+
+g2.1 <- g2.1 + ggtitle("(a) Build-ups")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=buildup_numeric_features_context$Context, shape=buildup_numeric_features_context$Context), size = 3) +
@@ -485,7 +485,7 @@ g2.1 <- g2.1 + #ggtitle("PCA on acoustic features of buildups")+
         legend.position = 'none', 
         legend.text=element_text(size=14),
         legend.title=element_blank(),
-        plot.title = element_text(size=18, hjust = 0.5),
+        plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -510,7 +510,7 @@ pca_climax_numeric_features_context <- princomp(climax_numeric_features_context[
 
 
 g3.2 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.2 <- g3.2 + #ggtitle("PCA on acoustic features of climax screams")+
+g3.2 <- g3.2 + ggtitle("(b) Climax screams")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=climax_numeric_features$Community, shape=climax_numeric_features$Community), size = 3) +
@@ -521,7 +521,7 @@ g3.2 <- g3.2 + #ggtitle("PCA on acoustic features of climax screams")+
         legend.position = 'none', 
         legend.title = element_blank(),
         legend.text=element_text(size=14),
-        plot.title = element_text(size=18, hjust = 0.5),
+        plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -529,7 +529,7 @@ g3.2 <- g3.2 + #ggtitle("PCA on acoustic features of climax screams")+
 g3.2
 
 g2.2 <- ggbiplot(pca_climax_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2.2 <- g2.2 + #ggtitle("PCA on acoustic features of climax screams")+
+g2.2 <- g2.2 + ggtitle("(b) Climax screams")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=climax_numeric_features_context$Context, shape=climax_numeric_features_context$Context), size = 3) +
@@ -540,7 +540,7 @@ g2.2 <- g2.2 + #ggtitle("PCA on acoustic features of climax screams")+
         legend.position = 'none', 
         legend.title = element_blank(),
         legend.text=element_text(size=14),
-        plot.title = element_text(size=18, hjust = 0.5),
+        plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -573,7 +573,7 @@ pca_complete_numeric_features_individual_kanyawara <- princomp(complete_numeric_
 
 
 g2.3 <- ggbiplot(pca_complete_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2.3 <- g2.3 + ggtitle("(c)")+
+g2.3 <- g2.3 + ggtitle("(c) All acoustic features")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=complete_numeric_features_context$Context, shape=complete_numeric_features_context$Context), size = 3) +
@@ -592,7 +592,7 @@ g2.3 <- g2.3 + ggtitle("(c)")+
 g2.3
 
 g3.3 <- ggbiplot(pca_complete_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.3 <- g3.3 + #ggtitle("PCA on all acoustic features")+
+g3.3 <- g3.3 + ggtitle("(c) All acoustic features")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=complete_numeric_features$Community, shape=complete_numeric_features$Community), size = 3) +
@@ -603,7 +603,7 @@ g3.3 <- g3.3 + #ggtitle("PCA on all acoustic features")+
         legend.position = 'right', 
         legend.title = element_blank(),
         legend.text=element_text(size=14),
-        plot.title = element_text(size=18, hjust = 0.5),
+        plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -611,7 +611,7 @@ g3.3 <- g3.3 + #ggtitle("PCA on all acoustic features")+
 g3.3
 
 g4.1 <- ggbiplot(pca_complete_numeric_features_individual_kasekela, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kasekela$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.1 <- g4.1 + ggtitle("(a)")+
+g4.1 <- g4.1 + ggtitle("(a) Kasekela")+
   scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
                                              "#F0E442", "#0072B2", "#D55E00")) +  
   scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22)) +
@@ -632,7 +632,7 @@ g4.1 <- g4.1 + ggtitle("(a)")+
 g4.1
 
 g4.2 <- ggbiplot(pca_complete_numeric_features_individual_mitumba, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_mitumba$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.2 <- g4.2 + #ggtitle("PCA on all acoustic features")+
+g4.2 <- g4.2 + ggtitle("(b) Mitumba")+
   scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
                                              "#F0E442", "#0072B2")) +  
   scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22)) +
@@ -644,7 +644,7 @@ g4.2 <- g4.2 + #ggtitle("PCA on all acoustic features")+
         legend.position = 'top', 
         legend.title = element_blank(),
         legend.text=element_text(size=14),
-        plot.title = element_text(size=18, hjust = 0.5),
+        plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -652,7 +652,7 @@ g4.2 <- g4.2 + #ggtitle("PCA on all acoustic features")+
 g4.2
 
 g4.3 <- ggbiplot(pca_complete_numeric_features_individual_kanyawara, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kanyawara$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.3 <- g4.3 + #ggtitle("PCA on all acoustic features")+
+g4.3 <- g4.3 + ggtitle("(c) Kanyawara")+
   scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
                                              "#F0E442", "#0072B2", "#D55E00", "#CC79A7")) +  
   scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22,23)) +
@@ -664,7 +664,7 @@ g4.3 <- g4.3 + #ggtitle("PCA on all acoustic features")+
         legend.position = 'right', 
         legend.title = element_blank(),
         legend.text=element_text(size=14),
-        plot.title = element_text(size=18, hjust = 0.5),
+        plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
