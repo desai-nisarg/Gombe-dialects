@@ -416,11 +416,20 @@ pca_structural_numeric_features <- princomp(structural_numeric_features_context[
 # library(devtools)
 # install_github("vqv/ggbiplot")
 library(ggbiplot) #See below for descriptions of these commands.
-g <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=structural_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g <- g + scale_color_discrete(name = '')
-g <- g + ggtitle("PCA on structural features of pant-hoots")+
-         theme(legend.direction = 'horizontal', 
+g <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, 
+              groups=structural_numeric_features_context$Context,
+              var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+#g <- g + scale_color_discrete(name = '')
+g <- g + ggtitle("PCA on structural features of pant-hoots")+ 
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  scale_shape_manual(name="Context", values=c(17,18)) +
+  geom_point(aes(colour=structural_numeric_features_context$Context, shape=structural_numeric_features_context$Context), size = 3) +
+  theme_bw() +
+         theme(panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               legend.direction = 'horizontal', 
                legend.position = 'top', 
+               legend.title = element_blank(),
                legend.text=element_text(size=14),
                plot.title = element_text(size=18, hjust = 0.5),
                axis.text.x = element_text(size=14),
@@ -443,19 +452,46 @@ buildup_numeric_features <- buildup_numeric_features %>% dplyr::filter(complete.
 buildup_numeric_features_context <- buildup_numeric_features %>% dplyr::filter(Context != "Display", Context != "Resting")
 
 pca_buildup_numeric_features <- princomp(buildup_numeric_features[,1:24], cor=TRUE)
+pca_buildup_numeric_features_context <- princomp(buildup_numeric_features_context[,1:24], cor=TRUE)
 
-g1 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g1 <- g1 + scale_color_discrete(name = '')
-g1 <- g1 + ggtitle("PCA on acoustic features of buildups")+
-  theme(legend.direction = 'horizontal', 
-        legend.position = 'top', 
+g3.1 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.1 <- g3.1 + #ggtitle("PCA on acoustic features of buildups")+
+  scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
+  scale_shape_manual(name="Community", values=c(17,18,19)) +
+  geom_point(aes(colour=buildup_numeric_features$Community, shape=buildup_numeric_features$Community), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #legend.direction = 'horizontal', 
+        legend.position = 'none', 
         legend.text=element_text(size=14),
+        legend.title=element_blank(),
         plot.title = element_text(size=18, hjust = 0.5),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
-        axis.title.y = element_text(size=16)) 
-g1
+        axis.title.y = element_text(size=16)) + ylim(-7.5,6)
+g3.1
+
+g2.1 <- ggbiplot(pca_buildup_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.1 <- g2.1 + #ggtitle("PCA on acoustic features of buildups")+
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  scale_shape_manual(name="Context", values=c(17,18)) +
+  geom_point(aes(colour=buildup_numeric_features_context$Context, shape=buildup_numeric_features_context$Context), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #legend.direction = 'horizontal', 
+        legend.position = 'none', 
+        legend.text=element_text(size=14),
+        legend.title=element_blank(),
+        plot.title = element_text(size=18, hjust = 0.5),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16)) + ylim(-7,9)
+g2.1
+
 
 # PCA on climax features and plot
 
@@ -469,20 +505,47 @@ climax_numeric_features <-  climax_numeric_features %>% filter(complete.cases(.)
 climax_numeric_features_context <- climax_numeric_features %>% 
   dplyr::filter(Context != "Display", Context != "Resting")
 
-pca_climax_numeric_features <- princomp(climax_numeric_features[,1:24], cor=TRUE)
+pca_climax_numeric_features <- princomp(climax_numeric_features[,1:25], cor=TRUE)
+pca_climax_numeric_features_context <- princomp(climax_numeric_features_context[,1:25], cor=TRUE)
 
-g2 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2 <- g2 + scale_color_discrete(name = '')
-g2 <- g2 + ggtitle("PCA on acoustic features of climax screams")+
-  theme(legend.direction = 'horizontal', 
-        legend.position = 'top', 
+
+g3.2 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.2 <- g3.2 + #ggtitle("PCA on acoustic features of climax screams")+
+  scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
+  scale_shape_manual(name="Community", values=c(17,18,19)) +
+  geom_point(aes(colour=climax_numeric_features$Community, shape=climax_numeric_features$Community), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #legend.direction = 'horizontal', 
+        legend.position = 'none', 
+        legend.title = element_blank(),
         legend.text=element_text(size=14),
         plot.title = element_text(size=18, hjust = 0.5),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
-        axis.title.y = element_text(size=16)) 
-g2
+        axis.title.y = element_text(size=16)) + ylim(-9,4.5)
+g3.2
+
+g2.2 <- ggbiplot(pca_climax_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.2 <- g2.2 + #ggtitle("PCA on acoustic features of climax screams")+
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  scale_shape_manual(name="Context", values=c(17,18)) +
+  geom_point(aes(colour=climax_numeric_features_context$Context, shape=climax_numeric_features_context$Context), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #legend.direction = 'horizontal', 
+        legend.position = 'none', 
+        legend.title = element_blank(),
+        legend.text=element_text(size=14),
+        plot.title = element_text(size=18, hjust = 0.5),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16)) + ylim(-4,12)
+g2.2
 
 # PCA on complete features and plots
 
@@ -496,25 +559,121 @@ complete_numeric_features <-  complete_numeric_features %>% filter(complete.case
 complete_numeric_features_context <- complete_numeric_features %>% 
   dplyr::filter(Context != "Display", Context != "Resting")
 complete_numeric_features_individual_kasekela <- complete_numeric_features %>% 
+  dplyr::filter(Community == "Kasekela")
+complete_numeric_features_individual_mitumba <- complete_numeric_features %>% 
+  dplyr::filter(Community == "Mitumba")
+complete_numeric_features_individual_kanyawara <- complete_numeric_features %>% 
   dplyr::filter(Community == "Kanyawara")
 
-pca_complete_numeric_features_individual <- princomp(complete_numeric_features_individual_kasekela[,1:63], cor=TRUE)
+pca_complete_numeric_features <- princomp(complete_numeric_features[,1:63], cor=TRUE)
+pca_complete_numeric_features_context <- princomp(complete_numeric_features_context[,1:63], cor=TRUE)
+pca_complete_numeric_features_individual_kasekela <- princomp(complete_numeric_features_individual_kasekela[,1:63], cor=TRUE)
+pca_complete_numeric_features_individual_mitumba <- princomp(complete_numeric_features_individual_mitumba[,1:41], cor=TRUE)
+pca_complete_numeric_features_individual_kanyawara <- princomp(complete_numeric_features_individual_kanyawara[,1:63], cor=TRUE)
 
-g3 <- ggbiplot(pca_complete_numeric_features_individual, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kasekela$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3 <- g3 + scale_color_discrete(name = '')
-g3 <- g3 + ggtitle("PCA on all acoustic features")+
-  theme(legend.direction = 'horizontal', 
-        legend.position = 'top', 
+
+g2.3 <- ggbiplot(pca_complete_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.3 <- g2.3 + ggtitle("(c)")+
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  scale_shape_manual(name="Context", values=c(17,18)) +
+  geom_point(aes(colour=complete_numeric_features_context$Context, shape=complete_numeric_features_context$Context), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.direction = 'vertical', 
+        legend.position = 'right', 
+        legend.title = element_blank(),
+        legend.text=element_text(size=14),
+        plot.title = element_text(size=18),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+g2.3
+
+g3.3 <- ggbiplot(pca_complete_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.3 <- g3.3 + #ggtitle("PCA on all acoustic features")+
+  scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
+  scale_shape_manual(name="Community", values=c(17,18,19)) +
+  geom_point(aes(colour=complete_numeric_features$Community, shape=complete_numeric_features$Community), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.direction = 'vertical', 
+        legend.position = 'right', 
+        legend.title = element_blank(),
         legend.text=element_text(size=14),
         plot.title = element_text(size=18, hjust = 0.5),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
-        axis.title.y = element_text(size=16)) + xlim(-7,7)
-g3
+        axis.title.y = element_text(size=16)) #+ xlim(-18, 4)
+g3.3
+
+g4.1 <- ggbiplot(pca_complete_numeric_features_individual_kasekela, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kasekela$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g4.1 <- g4.1 + ggtitle("(a)")+
+  scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
+                                             "#F0E442", "#0072B2", "#D55E00")) +  
+  scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22)) +
+  geom_point(aes(colour=complete_numeric_features_individual_kasekela$Individual, shape=complete_numeric_features_individual_kasekela$Individual), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.direction = 'horizontal', 
+        legend.position = 'top', 
+        legend.title = element_blank(),
+        legend.text=element_text(size=14),
+        plot.title = element_text(size=18),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16)) + ylim(-6,8) +
+  guides(color = guide_legend(nrow = 1))
+g4.1
+
+g4.2 <- ggbiplot(pca_complete_numeric_features_individual_mitumba, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_mitumba$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g4.2 <- g4.2 + #ggtitle("PCA on all acoustic features")+
+  scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
+                                             "#F0E442", "#0072B2")) +  
+  scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22)) +
+  geom_point(aes(colour=complete_numeric_features_individual_mitumba$Individual, shape=complete_numeric_features_individual_mitumba$Individual), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.direction = 'horizontal', 
+        legend.position = 'top', 
+        legend.title = element_blank(),
+        legend.text=element_text(size=14),
+        plot.title = element_text(size=18, hjust = 0.5),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16)) + ylim(-7,7)
+g4.2
+
+g4.3 <- ggbiplot(pca_complete_numeric_features_individual_kanyawara, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kanyawara$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g4.3 <- g4.3 + #ggtitle("PCA on all acoustic features")+
+  scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
+                                             "#F0E442", "#0072B2", "#D55E00", "#CC79A7")) +  
+  scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22,23)) +
+  geom_point(aes(colour=complete_numeric_features_individual_kanyawara$Individual, shape=complete_numeric_features_individual_kanyawara$Individual), size = 3) +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.direction = 'vertical', 
+        legend.position = 'right', 
+        legend.title = element_blank(),
+        legend.text=element_text(size=14),
+        plot.title = element_text(size=18, hjust = 0.5),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16)) + coord_flip() + xlim(-4,4)
+g4.3
 
 ######----pDFAs-----###### 
-
+detach(package:ggbiplot)
+detach(package:plyr)
 #######------pDFA FOR CONTEXT------#######
 source("~/Desktop/Nisarg files/Dialects/rercodeforpdfa/pdfa_functions.r")
 
@@ -532,7 +691,7 @@ number_by_caller_context_structural <- structural_numeric_features %>% dplyr::gr
 structural_numeric_features_2 <- structural_numeric_features_2 %>% 
   dplyr::filter(!(Caller %in% number_by_caller_context_structural[number_by_caller_context_structural$n < 3,]$Caller))
 
-structural_numeric_features_2 %>% group_by(Context) %>% count
+structural_numeric_features_2 %>% group_by(Context, Caller) %>% count
 
 pca_pdfa_context_structural <- princomp(structural_numeric_features_2[,1:14], cor = T)
 screeplot(pca_pdfa_context_structural, type = "lines")
@@ -898,7 +1057,7 @@ pdfa_community_complete
 pdfa_data_community_complete_gombe <- pdfa_data_community_complete %>% 
   filter(Community != "Kanyawara")
 
-pdfa_data_community_complete_gombe %>% group_by(Community) %>% count()
+pdfa_data_community_complete_gombe %>% group_by(Community, Caller) %>% count()
 
 pdfa_data_community_complete_gombe <- pdfa_data_community_complete_gombe %>% filter(Caller != "ZS")
 
@@ -1209,4 +1368,48 @@ RF_gombe_individual <- randomForest(Individual ~ ., data = Imputed_individual_go
 RF_gombe_individual
 varImpPlot(RF_gombe_individual)
 
+######-------########------########-------######
 
+structural_features_data <- dialects %>% dplyr::select(all_of(structural_features))
+
+structural_features_data <- structural_features_data %>% 
+  dplyr::select(-contains(c("beats","drumming")), -Duration, -`Non linearities`, -Time, -Chorus, -Date, -Filename,
+              -`Buildup component chosen`, -`Climax scream chosen`, -Context)
+
+structural_features_data_2 <- structural_features_data %>% 
+  filter(Community != "Kanyawara") %>% filter(complete.cases(.))
+
+structural_features_data_2 %>% group_by(Community, Caller) %>% count
+
+a <- structural_features_data_2 %>% mutate_if(is.character, as.factor)
+
+names(a) <- make.names(names(a))
+f<-paste("Community", "~", paste(names(a)[-(1:2)], collapse='+'), "+(1|Caller)")
+f <- as.formula(f)
+# structural_numeric_features <- structural_numeric_features %>% 
+#   add_column(Community = dialects$Community, Caller = dialects$Caller, Context = dialects$Context) %>% 
+#   dplyr::filter(complete.cases(.)) 
+
+library(lme4)
+
+m <- glmer(f, data = a, family = binomial)
+
+
+a <- aov(duration_1 ~ Community + Error(Caller), dialects)
+k <- lmer(duration_1 ~ Community + (1|Caller), data = dialects)
+
+dialects %>% 
+  ggplot(aes(y=duration, x = Community, color = Community)) +
+  geom_boxplot(show.legend = FALSE) + geom_jitter(show.legend = FALSE) +# facet_wrap(~Community, scales = "free_x")
+  theme(axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+dialects %>% group_by(Caller) %>% summarise(mean)
+  ggplot(aes(y=duration, x = Community, color = Community)) +
+  geom_boxplot(show.legend = FALSE) + geom_jitter(show.legend = FALSE) +# facet_wrap(~Community, scales = "free_x")
+  theme(axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
