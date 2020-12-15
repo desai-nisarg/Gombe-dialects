@@ -405,6 +405,9 @@ dialects %>%
   geom_bar(position = "fill") + facet_wrap(~Community, scales = "free")
 
 #######----ANALYSIS----###### 
+# library(devtools)
+# install_github("vqv/ggbiplot")
+library(ggbiplot) 
 
 ##PCA on structural features and plot
 
@@ -412,15 +415,13 @@ structural_numeric_features_context <- structural_numeric_features %>%
   dplyr::filter(Context != "Display", Context != "Resting")
 
 pca_structural_numeric_features <- princomp(structural_numeric_features_context[,1:14], cor=TRUE)
+summary(pca_structural_numeric_features)
+pca_structural_numeric_features$loadings
 
-# library(devtools)
-# install_github("vqv/ggbiplot")
-library(ggbiplot) #See below for descriptions of these commands.
-g <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, 
+g2.1 <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, 
               groups=structural_numeric_features_context$Context,
               var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-#g <- g + scale_color_discrete(name = '')
-g <- g + ggtitle("PCA on structural features of pant-hoots")+ 
+g2.1 <- g2.1 + ggtitle("(a) Context")+ 
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=structural_numeric_features_context$Context, shape=structural_numeric_features_context$Context), size = 3) +
@@ -431,13 +432,71 @@ g <- g + ggtitle("PCA on structural features of pant-hoots")+
                legend.position = 'top', 
                legend.title = element_blank(),
                legend.text=element_text(size=14),
-               plot.title = element_text(size=18, hjust = 0.5),
+               plot.title = element_text(size=18),
                axis.text.x = element_text(size=14),
                axis.text.y = element_text(size=14),
                axis.title.x = element_text(size=16),
                axis.title.y = element_text(size=16)) 
-g
+g2.1
 
+g2.2 <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, 
+                 groups=structural_numeric_features_context$Community,
+                 var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.2 <- g2.2 + ggtitle("(b) Community")+ 
+  scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
+  scale_shape_manual(name="Community", values=c(17,18,19)) +
+  geom_point(aes(colour=structural_numeric_features_context$Community, shape=structural_numeric_features_context$Community), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.direction = 'horizontal', 
+        legend.position = 'top', 
+        legend.title = element_blank(),
+        legend.text=element_text(size=14),
+        plot.title = element_text(size=18),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16)) 
+g2.2
+
+detach(package:ggbiplot)
+detach(package:plyr)
+
+structural_numeric_features_individual <- structural_numeric_features_context %>% 
+  filter(!Caller %in% c("ZS")) 
+
+number_by_caller_individual_structural <- structural_numeric_features_individual %>% group_by(Context, Caller) %>% count
+
+structural_numeric_features_individual <- structural_numeric_features_individual %>% 
+  dplyr::filter(!(Caller %in% number_by_caller_individual_structural[number_by_caller_individual_structural$n < 4,]$Caller))
+
+structural_numeric_features_individual %>% group_by(Caller) %>% count
+
+
+pca_individual_structural <- princomp(structural_numeric_features_individual[,1:14], cor = T)
+
+library(ggbiplot)
+
+g2.3 <- ggbiplot(pca_individual_structural, choices = 1:2, obs.scale=1, var.scale=1, groups=structural_numeric_features_individual$Caller, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.3 <- g2.3 + ggtitle("(c) Individual")+
+  scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
+                                             "#F0E442", "#0072B2", "#D55E00", "#CC79A7")) +  
+  scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22,23)) +
+  geom_point(aes(colour=structural_numeric_features_individual$Caller, shape=structural_numeric_features_individual$Caller), size = 3) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.direction = 'vertical', 
+        legend.position = 'right', 
+        legend.title = element_blank(),
+        legend.text=element_text(size=14),
+        plot.title = element_text(size=18),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16)) #+ ylim(-6,8) +
+g2.3
 
 
 # PCA on buildup features and plot
@@ -454,8 +513,8 @@ buildup_numeric_features_context <- buildup_numeric_features %>% dplyr::filter(C
 pca_buildup_numeric_features <- princomp(buildup_numeric_features[,1:24], cor=TRUE)
 pca_buildup_numeric_features_context <- princomp(buildup_numeric_features_context[,1:24], cor=TRUE)
 
-g3.1 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.1 <- g3.1 + ggtitle("(a) Build-ups")+
+g4.1 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g4.1 <- g4.1 + ggtitle("(a) Build-ups")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=buildup_numeric_features$Community, shape=buildup_numeric_features$Community), size = 3) +
@@ -471,10 +530,10 @@ g3.1 <- g3.1 + ggtitle("(a) Build-ups")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-7.5,6)
-g3.1
+g4.1
 
-g2.1 <- ggbiplot(pca_buildup_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2.1 <- g2.1 + ggtitle("(a) Build-ups")+
+g3.1 <- ggbiplot(pca_buildup_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.1 <- g3.1 + ggtitle("(a) Build-ups")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=buildup_numeric_features_context$Context, shape=buildup_numeric_features_context$Context), size = 3) +
@@ -490,7 +549,7 @@ g2.1 <- g2.1 + ggtitle("(a) Build-ups")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-7,9)
-g2.1
+g3.1
 
 
 # PCA on climax features and plot
@@ -509,8 +568,8 @@ pca_climax_numeric_features <- princomp(climax_numeric_features[,1:25], cor=TRUE
 pca_climax_numeric_features_context <- princomp(climax_numeric_features_context[,1:25], cor=TRUE)
 
 
-g3.2 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.2 <- g3.2 + ggtitle("(b) Climax screams")+
+g4.2 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g4.2 <- g4.2 + ggtitle("(b) Climax screams")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=climax_numeric_features$Community, shape=climax_numeric_features$Community), size = 3) +
@@ -526,10 +585,10 @@ g3.2 <- g3.2 + ggtitle("(b) Climax screams")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-9,4.5)
-g3.2
+g4.2
 
-g2.2 <- ggbiplot(pca_climax_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2.2 <- g2.2 + ggtitle("(b) Climax screams")+
+g3.2 <- ggbiplot(pca_climax_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.2 <- g3.2 + ggtitle("(b) Climax screams")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=climax_numeric_features_context$Context, shape=climax_numeric_features_context$Context), size = 3) +
@@ -545,7 +604,7 @@ g2.2 <- g2.2 + ggtitle("(b) Climax screams")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-4,12)
-g2.2
+g3.2
 
 # PCA on complete features and plots
 
@@ -572,8 +631,8 @@ pca_complete_numeric_features_individual_mitumba <- princomp(complete_numeric_fe
 pca_complete_numeric_features_individual_kanyawara <- princomp(complete_numeric_features_individual_kanyawara[,1:63], cor=TRUE)
 
 
-g2.3 <- ggbiplot(pca_complete_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2.3 <- g2.3 + ggtitle("(c) All acoustic features")+
+g3.3 <- ggbiplot(pca_complete_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.3 <- g3.3 + ggtitle("(c) All acoustic features")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=complete_numeric_features_context$Context, shape=complete_numeric_features_context$Context), size = 3) +
@@ -589,10 +648,10 @@ g2.3 <- g2.3 + ggtitle("(c) All acoustic features")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
-g2.3
+g3.3
 
-g3.3 <- ggbiplot(pca_complete_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.3 <- g3.3 + ggtitle("(c) All acoustic features")+
+g4.3 <- ggbiplot(pca_complete_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g4.3 <- g4.3 + ggtitle("(c) All acoustic features")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=complete_numeric_features$Community, shape=complete_numeric_features$Community), size = 3) +
@@ -608,10 +667,10 @@ g3.3 <- g3.3 + ggtitle("(c) All acoustic features")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) #+ xlim(-18, 4)
-g3.3
+g4.3
 
-g4.1 <- ggbiplot(pca_complete_numeric_features_individual_kasekela, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kasekela$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.1 <- g4.1 + ggtitle("(a) Kasekela")+
+g5.1 <- ggbiplot(pca_complete_numeric_features_individual_kasekela, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kasekela$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g5.1 <- g5.1 + ggtitle("(a) Kasekela")+
   scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
                                              "#F0E442", "#0072B2", "#D55E00")) +  
   scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22)) +
@@ -629,10 +688,10 @@ g4.1 <- g4.1 + ggtitle("(a) Kasekela")+
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-6,8) +
   guides(color = guide_legend(nrow = 1))
-g4.1
+g5.1
 
-g4.2 <- ggbiplot(pca_complete_numeric_features_individual_mitumba, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_mitumba$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.2 <- g4.2 + ggtitle("(b) Mitumba")+
+g5.2 <- ggbiplot(pca_complete_numeric_features_individual_mitumba, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_mitumba$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g5.2 <- g5.2 + ggtitle("(b) Mitumba")+
   scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
                                              "#F0E442", "#0072B2")) +  
   scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22)) +
@@ -649,10 +708,10 @@ g4.2 <- g4.2 + ggtitle("(b) Mitumba")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-7,7)
-g4.2
+g5.2
 
-g4.3 <- ggbiplot(pca_complete_numeric_features_individual_kanyawara, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kanyawara$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.3 <- g4.3 + ggtitle("(c) Kanyawara")+
+g5.3 <- ggbiplot(pca_complete_numeric_features_individual_kanyawara, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kanyawara$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g5.3 <- g5.3 + ggtitle("(c) Kanyawara")+
   scale_color_manual(name="Caller", values=c("#E69F00", "#56B4E9", "#009E73",
                                              "#F0E442", "#0072B2", "#D55E00", "#CC79A7")) +  
   scale_shape_manual(name="Caller", values=c(17,18,19,20,21,22,23)) +
@@ -669,46 +728,86 @@ g4.3 <- g4.3 + ggtitle("(c) Kanyawara")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + coord_flip() + xlim(-4,4)
-g4.3
+g5.3
 
 ######----pDFAs-----###### 
 detach(package:ggbiplot)
 detach(package:plyr)
-#######------pDFA FOR CONTEXT------#######
 source("~/Desktop/Nisarg files/Dialects/rercodeforpdfa/pdfa_functions.r")
+devtools::install_github("gobbios/cfp")
+library(cfp)
+
+#######------pDFA FOR CONTEXT------#######
 
 # ON structural NUMERIC FEATURES
 
-structural_numeric_features_2 <- as.data.frame(structural_numeric_features)
+structural_numeric_features_context <- as.data.frame(structural_numeric_features)
 
-names(structural_numeric_features_2) <- make.names(names(structural_numeric_features_2))
+names(structural_numeric_features_context) <- make.names(names(structural_numeric_features_context))
 
-structural_numeric_features_2 <- structural_numeric_features_2 %>% 
+structural_numeric_features_context <- structural_numeric_features_context %>% 
   dplyr::filter(Context != "Display", Context != "Resting")
 
-number_by_caller_context_structural <- structural_numeric_features %>% dplyr::group_by(Context, Caller) %>% count()
+number_by_caller_context_structural <- structural_numeric_features_context %>% dplyr::group_by(Context, Caller) %>% count()
 
-structural_numeric_features_2 <- structural_numeric_features_2 %>% 
+structural_numeric_features_context <- structural_numeric_features_context %>% 
   dplyr::filter(!(Caller %in% number_by_caller_context_structural[number_by_caller_context_structural$n < 3,]$Caller))
 
-structural_numeric_features_2 %>% group_by(Context, Caller) %>% count
+structural_numeric_features_context <- structural_numeric_features_context %>% 
+  filter(!Caller %in% c("ZS")) 
 
-pca_pdfa_context_structural <- princomp(structural_numeric_features_2[,1:14], cor = T)
+a<-structural_numeric_features_context %>% group_by(Context, Caller) %>% count
+
+a %>% dplyr::select(Context, n) %>% group_by(Context) %>% 
+  summarize(mean = mean(n), median = median(n), range = range(n))
+
+pca_pdfa_context_structural <- princomp(structural_numeric_features_context[,1:14], cor = T)
 screeplot(pca_pdfa_context_structural, type = "lines")
 
 pca_scores_pdfa_context_structural <- as_tibble(pca_pdfa_context_structural$scores)
 pca_scores_pdfa_context_structural <- pca_scores_pdfa_context_structural %>% 
-  add_column(Caller = structural_numeric_features_2$Caller, Context = structural_numeric_features_2$Context,
-             Community = structural_numeric_features_2$Community)
+  add_column(Caller = structural_numeric_features_context$Caller, Context = structural_numeric_features_context$Context,
+             Community = structural_numeric_features_context$Community)
 
-vars_pdfa_context_structural <- names(pca_scores_pdfa_context_structural[,1:10])
+vars_pdfa_context_structural <- names(pca_scores_pdfa_context_structural[,1:7])
 
+set.seed(46) #p=.0440
 pdfa_context_structural=pDFA.crossed(test.fac="Context", contr.fac="Caller",
                                    variables=vars_pdfa_context_structural, n.to.sel=NULL,
                                    n.sel=100, n.perm=1000, 
                                    pdfa.data=as.data.frame(pca_scores_pdfa_context_structural))
 pdfa_context_structural
 
+
+ImpVars_context_structural <- repDFA(as.data.frame(pca_scores_pdfa_context_structural), testfactor = "Context", balancefactor = c("Context", "Caller"), varnames = vars_pdfa_context_structural,
+              npercomb = 3, nrand = 10000)
+table(ImpVars_context_structural$df1_best)
+pca_pdfa_context_structural$loadings
+
+# ON SRRUCTURAL FEATURES OF GOMBE
+
+structural_numeric_features_context_gombe <- structural_numeric_features_context %>% 
+  filter(Community != "Kanyawara")
+
+a<-structural_numeric_features_context_gombe %>% group_by(Context, Caller) %>% count
+
+pca_pdfa_context_structural_gombe <- princomp(structural_numeric_features_context_gombe[,1:14], cor = T)
+screeplot(pca_pdfa_context_structural_gombe, type = "lines")
+
+pca_scores_pdfa_context_structural_gombe <- as_tibble(pca_pdfa_context_structural_gombe$scores)
+pca_scores_pdfa_context_structural_gombe <- pca_scores_pdfa_context_structural_gombe %>% 
+  add_column(Caller = structural_numeric_features_context_gombe$Caller, Context = structural_numeric_features_context_gombe$Context,
+             Community = structural_numeric_features_context_gombe$Community)
+
+vars_pdfa_context_structural_gombe <- names(pca_scores_pdfa_context_structural_gombe[,1:8])
+
+set.seed(23) # p=0.291
+pdfa_context_structural_gombe=pDFA.crossed(test.fac="Context", contr.fac="Caller",
+                                     variables=vars_pdfa_context_structural_gombe, n.to.sel=NULL,
+                                     n.sel=100, n.perm=1000, 
+                                     pdfa.data=as.data.frame(pca_scores_pdfa_context_structural_gombe))
+
+pdfa_context_structural_gombe # Not reliable due to low sample sizes
 
 # ON CLIMAXES
 
@@ -869,7 +968,7 @@ pca_scores_pdfa_context_complete <- pca_scores_pdfa_context_complete %>% add_col
 
 screeplot(pca_pdfa_context_complete, npcs = 35, type = "lines")
 
-vars_pdfa_context_complete <- names(pca_scores_pdfa_context_complete[,1:30])
+vars_pdfa_context_complete <- names(pca_scores_pdfa_context_complete[,1:16])
 
 pdfa_context_complete=pDFA.crossed(test.fac="Context", contr.fac="Caller",
                                    variables=vars_pdfa_context_complete, n.to.sel=NULL,
@@ -903,37 +1002,76 @@ pdfa_context_complete_gombe
 
 #######------pDFA FOR COMMUNITY-----#######
 
-# ON structural NUMERIC FEATURES
+# ON STRUCTURAL NUMERIC FEATURES
 
-structural_numeric_features_2 <- as.data.frame(structural_numeric_features)
+structural_numeric_features_community <- as.data.frame(structural_numeric_features)
 
-names(structural_numeric_features_2) <- make.names(names(structural_numeric_features_2))
+names(structural_numeric_features_community) <- make.names(names(structural_numeric_features_community))
 
-number_by_caller_community_structural <- structural_numeric_features_2 %>% group_by(Community, Caller) %>% count
+structural_numeric_features_community <- structural_numeric_features_community %>% 
+  filter(Context != "Display", Context != "Resting")
 
-structural_numeric_features_2 <- structural_numeric_features_2 %>% 
+number_by_caller_community_structural <- structural_numeric_features_community %>% group_by(Community, Caller) %>% count
+
+structural_numeric_features_community <- structural_numeric_features_community %>% 
   dplyr::filter(!(Caller %in% number_by_caller_community_structural[number_by_caller_community_structural$n < 4,]$Caller))
 
-structural_numeric_features_2 %>% group_by(Community, Caller) %>% count
-structural_numeric_features_2 %>% group_by(Community) %>% count
+a <- structural_numeric_features_community %>% group_by(Community, Caller) %>% count
+a %>% ungroup() %>% group_by(Community) %>% summarise(range = range(n), median = median(n))
 
-
-pca_pdfa_community_structural <- princomp(structural_numeric_features_2[,1:14], cor = T)
+pca_pdfa_community_structural <- princomp(structural_numeric_features_community[,1:14], cor = T)
 screeplot(pca_pdfa_community_structural, type = "lines")
 
 pca_scores_pdfa_community_structural <- as_tibble(pca_pdfa_community_structural$scores)
 pca_scores_pdfa_community_structural <- pca_scores_pdfa_community_structural %>% 
-  add_column(Caller = structural_numeric_features_2$Caller, Context = structural_numeric_features_2$Context,
-             Community = structural_numeric_features_2$Community)
+  add_column(Caller = structural_numeric_features_community$Caller, Context = structural_numeric_features_community$Context,
+             Community = structural_numeric_features_community$Community)
 
 vars_pdfa_community_structural <- names(pca_scores_pdfa_community_structural[,1:7])
 
-pdfa_community_structural=pDFA.nested(test.fac="Community", contr.fac="Caller",
+set.seed(345) #p=0.322
+pdfa_community_structural_ContextControlled=pDFA.crossed(test.fac="Community", contr.fac="Context",
                                  variables=vars_pdfa_community_structural, n.to.sel=NULL,
                                  n.sel=100, n.perm=1000, 
                                  pdfa.data=as.data.frame(pca_scores_pdfa_community_structural))
-pdfa_community_structural
+pdfa_community_structural_ContextControlled
 
+set.seed(67) #p=0.729
+pdfa_community_structural_CallerControlled=pDFA.nested(test.fac="Community", contr.fac="Caller",
+                                          variables=vars_pdfa_community_structural, n.to.sel=NULL,
+                                          n.sel=100, n.perm=1000, 
+                                          pdfa.data=as.data.frame(pca_scores_pdfa_community_structural))
+pdfa_community_structural_CallerControlled
+
+# On STRUCTURAL FEATURES OF GOMBE
+
+structural_numeric_features_community_gombe <- structural_numeric_features_community %>% 
+  filter(Community != "Kanyawara")
+
+pca_pdfa_community_structural_gombe <- princomp(structural_numeric_features_community_gombe[,1:14], cor = T)
+screeplot(pca_pdfa_community_structural_gombe, type = "lines")
+summary(pca_pdfa_community_structural_gombe)
+
+pca_scores_pdfa_community_structural_gombe <- as_tibble(pca_pdfa_community_structural_gombe$scores)
+pca_scores_pdfa_community_structural_gombe <- pca_scores_pdfa_community_structural_gombe %>% 
+  add_column(Caller = structural_numeric_features_community_gombe$Caller, Context = structural_numeric_features_community_gombe$Context,
+             Community = structural_numeric_features_community_gombe$Community)
+
+vars_pdfa_community_structural_gombe <- names(pca_scores_pdfa_community_structural_gombe[,1:7])
+
+set.seed(77) #p=0.412
+pdfa_community_structural_gombe_ContextControlled=pDFA.crossed(test.fac="Community", contr.fac="Context",
+                                      variables=vars_pdfa_community_structural_gombe, n.to.sel=NULL,
+                                      n.sel=100, n.perm=1000, 
+                                      pdfa.data=as.data.frame(pca_scores_pdfa_community_structural_gombe))
+pdfa_community_structural_gombe_ContextControlled
+
+set.seed(52) #p=0.639
+pdfa_community_structural_gombe_CallerControlled=pDFA.nested(test.fac="Community", contr.fac="Caller",
+                                                       variables=vars_pdfa_community_structural_gombe, n.to.sel=NULL,
+                                                       n.sel=100, n.perm=1000, 
+                                                       pdfa.data=as.data.frame(pca_scores_pdfa_community_structural_gombe))
+pdfa_community_structural_gombe_CallerControlled 
 
 
 # ON CLIMAXES
@@ -958,6 +1096,12 @@ pdfa_community_climaxes <- pDFA.nested(test.fac="Community", contr.fac = "Caller
                         pdfa.data=as.data.frame(pdfa_data_community_climaxes))
 pdfa_community_climaxes
 
+
+ImpVars_context_structural <- repDFA(as.data.frame(pca_scores_pdfa_context_structural), testfactor = "Context", balancefactor = c("Context", "Caller"), varnames = vars_pdfa_context_structural,
+                                     npercomb = 3, nrand = 1000)
+table(ImpVars_context_structural$df1_best)
+
+
 # ON CLIMAXES OF GOMBE
 
 pdfa_data_community_climaxes_gombe <- pdfa_data_community_climaxes %>% 
@@ -973,8 +1117,9 @@ pca_scores_pdfa_community_climaxes_gombe <- as_tibble(pca_pdfa_community_climaxe
 pca_scores_pdfa_community_climaxes_gombe <- pca_scores_pdfa_community_climaxes_gombe %>% 
   add_column(Caller = pdfa_data_community_climaxes_gombe$Caller, Community = pdfa_data_community_climaxes_gombe$Community)
 
-vars_pdfa_community_climaxes_gombe <- names(pca_scores_pdfa_community_climaxes_gombe[,1:18])
+vars_pdfa_community_climaxes_gombe <- names(pca_scores_pdfa_community_climaxes_gombe[,1:12])
 
+set.seed(21) #p=0.089
 pdfa_community_climaxes_gombe <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                               variables=vars_pdfa_community_climaxes_gombe, 
                               restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
@@ -998,6 +1143,7 @@ pdfa_data_community_buildups %>%
 
 vars_pdfa_community_buildups <- names(pdfa_data_community_buildups[,4:27])
 
+set.seed(95) #p=0.08 (54)65
 pdfa_community_buildups <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                               variables=vars_pdfa_community_buildups, 
                               restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
@@ -1025,7 +1171,7 @@ pdfa_data_community_complete <-
   complete_calls %>% dplyr::select(Community, Caller, Context, all_of(structural_features_numeric), all_of(buildup_features), all_of(climax_features), -call, -durat2, -select, -call_1, -durat2_1, -select_1) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
   dplyr::filter(complete.cases(.))
 
-pdfa_data_community_complete %>% group_by(Community, Caller) %>% count
+pdfa_data_community_complete %>% group_by(Community) %>% count
 
 pdfa_data_community_complete <- pdfa_data_community_complete %>% dplyr::filter(!Caller %in% c("ZS"))
 
@@ -1043,7 +1189,7 @@ pca_scores_pdfa_community_complete <- pca_scores_pdfa_community_complete %>%
              Context = pdfa_data_community_complete$Context)
 
 
-vars_pdfa_community_complete <- names(pca_scores_pdfa_community_complete[,1:38])
+vars_pdfa_community_complete <- names(pca_scores_pdfa_community_complete[,1:25])
 
 pdfa_community_complete <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                                        variables=vars_pdfa_community_complete, 
@@ -1085,6 +1231,46 @@ pdfa_community_complete_gombe
 
 
 #######------pDFA FOR INDIVIDUAL----######
+
+# ON structural NUMERIC FEATURES
+
+structural_numeric_features_individual <- as.data.frame(structural_numeric_features)
+
+names(structural_numeric_features_individual) <- make.names(names(structural_numeric_features_individual))
+
+structural_numeric_features_individual <- structural_numeric_features_individual %>% 
+  dplyr::filter(Context != "Display", Context != "Resting")
+
+structural_numeric_features_individual <- structural_numeric_features_individual %>% 
+  filter(!Caller %in% c("ZS")) 
+
+number_by_caller_individual_structural <- structural_numeric_features_individual %>% group_by(Context, Caller) %>% count
+
+structural_numeric_features_individual <- structural_numeric_features_individual %>% 
+  dplyr::filter(!(Caller %in% number_by_caller_individual_structural[number_by_caller_individual_structural$n < 4,]$Caller))
+
+a<-structural_numeric_features_individual %>% group_by(Context, Caller) %>% count
+b<-structural_numeric_features_individual %>% group_by(Caller) %>% count
+median(b$n)
+range(b$n)
+
+pca_pdfa_individual_structural <- princomp(structural_numeric_features_individual[,1:14], cor = T)
+screeplot(pca_pdfa_individual_structural, type = "lines")
+
+pca_scores_pdfa_individual_structural <- as_tibble(pca_pdfa_individual_structural$scores)
+pca_scores_pdfa_individual_structural <- pca_scores_pdfa_individual_structural %>% 
+  add_column(Caller = structural_numeric_features_individual$Caller, Context = structural_numeric_features_individual$Context,
+             Community = structural_numeric_features_individual$Community)
+
+vars_pdfa_individual_structural <- names(pca_scores_pdfa_individual_structural[,1:9])
+
+set.seed(63) # p=0.043
+pdfa_individual_structural=pDFA.crossed(test.fac="Caller", contr.fac = "Context",
+                                      variables=vars_pdfa_individual_structural, n.to.sel=NULL,
+                                      n.sel=100, n.perm=1000, 
+                                      pdfa.data=as.data.frame(pca_scores_pdfa_individual_structural))
+pdfa_individual_structural
+
 
 # ON CLIMAXES
 
