@@ -6,7 +6,6 @@ library(tidyverse)
 # Read and clean data
 
 dialects <- read_csv("All_communities.csv")
-class(dialects)
 
 # Remove individuals with number of calls < 8
 
@@ -407,7 +406,6 @@ dialects %>%
 #######----ANALYSIS----###### 
 # library(devtools)
 # install_github("vqv/ggbiplot")
-library(ggbiplot) 
 
 ##PCA on structural features and plot
 
@@ -418,10 +416,11 @@ pca_structural_numeric_features <- princomp(structural_numeric_features_context[
 summary(pca_structural_numeric_features)
 pca_structural_numeric_features$loadings
 
+library(ggbiplot) 
 g2.1 <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, 
               groups=structural_numeric_features_context$Context,
-              var.axes = T, ellipse = TRUE, circle = TRUE, varname.size=4, varname.adjust=2)
-g2.1 <- g2.1 + ggtitle("(a) Context")+ 
+              var.axes = F, ellipse = TRUE, circle = F, varname.size=4, varname.adjust=2)
+g2.1 <- g2.1 + ggtitle("(a) Structural features")+ 
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=structural_numeric_features_context$Context, shape=structural_numeric_features_context$Context), size = 3) +
@@ -429,10 +428,12 @@ g2.1 <- g2.1 + ggtitle("(a) Context")+
   theme_bw() +
          theme(panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
-               legend.direction = 'horizontal', 
-               legend.position = 'top', 
-               legend.title = element_blank(),
-               legend.text=element_text(size=14),
+               panel.border = element_rect(colour = "black", size=1),
+               legend.direction = 'vertical', 
+               legend.position = 'right',
+               legend.background = element_rect(colour = 'black', size = 0.5),
+               legend.title = element_text(size=18),
+               legend.text=element_text(size=18),
                plot.title = element_text(size=18),
                axis.text.x = element_text(size=14),
                axis.text.y = element_text(size=14),
@@ -440,26 +441,28 @@ g2.1 <- g2.1 + ggtitle("(a) Context")+
                axis.title.y = element_text(size=16)) 
 g2.1
 
-g2.2 <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, 
+g3.1 <- ggbiplot(pca_structural_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, 
                  groups=structural_numeric_features_context$Community,
                  var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g2.2 <- g2.2 + ggtitle("(b) Community")+ 
+g3.1 <- g3.1 + ggtitle("(a) Structural features")+ 
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=structural_numeric_features_context$Community, shape=structural_numeric_features_context$Community), size = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.direction = 'horizontal', 
-        legend.position = 'top', 
-        legend.title = element_blank(),
-        legend.text=element_text(size=14),
+        panel.border = element_rect(colour = "black", size=1),
+        legend.direction = 'vertical', 
+        legend.position = 'right',
+        legend.background = element_rect(colour = 'black', size = 0.5),
+        legend.title = element_text(size=18),
+        legend.text=element_text(size=18),
         plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) 
-g2.2
+g3.1
 
 detach(package:ggbiplot)
 detach(package:plyr)
@@ -501,6 +504,8 @@ g2.3
 
 
 # PCA on buildup features and plot
+detach(package:ggbiplot)
+detach(package:plyr)
 
 buildup_numeric_features <- dialects %>% 
   dplyr::select(all_of(buildup_features)) %>% 
@@ -513,15 +518,17 @@ buildup_numeric_features_context <- buildup_numeric_features %>% dplyr::filter(C
 
 pca_buildup_numeric_features <- princomp(buildup_numeric_features[,1:24], cor=TRUE)
 pca_buildup_numeric_features_context <- princomp(buildup_numeric_features_context[,1:24], cor=TRUE)
+library(ggbiplot)
 
-g4.1 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.1 <- g4.1 + ggtitle("(a) Build-ups")+
+g3.2 <- ggbiplot(pca_buildup_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.2 <- g3.2 + ggtitle("(b) Build-up features")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=buildup_numeric_features$Community, shape=buildup_numeric_features$Community), size = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         #legend.direction = 'horizontal', 
         legend.position = 'none', 
         legend.text=element_text(size=14),
@@ -531,30 +538,32 @@ g4.1 <- g4.1 + ggtitle("(a) Build-ups")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-7.5,6)
-g4.1
+g3.2
 
-g3.1 <- ggbiplot(pca_buildup_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.1 <- g3.1 + ggtitle("(a) Build-ups")+
+g2.2 <- ggbiplot(pca_buildup_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=buildup_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.2 <- g2.2 + ggtitle("(b) Build-up features")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=buildup_numeric_features_context$Context, shape=buildup_numeric_features_context$Context), size = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        #legend.direction = 'horizontal', 
+        #legend.direction = 'vertical', 
         legend.position = 'none', 
-        legend.text=element_text(size=14),
-        legend.title=element_blank(),
+        legend.text=element_text(size=18),
+        legend.title=element_text(size=18),
         plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
-        axis.title.y = element_text(size=16)) + ylim(-7,9)
-g3.1
+        axis.title.y = element_text(size=16),
+        panel.border = element_rect(colour = "black", size=1)) #+ ylim(-7,9)
+g2.2
 
 
 # PCA on climax features and plot
-
+detach(package:ggbiplot)
+detach(package:plyr)
 climax_numeric_features <- dialects %>% 
   dplyr::select(all_of(climax_features)) %>% 
   dplyr::select_if(is.numeric) %>% 
@@ -568,15 +577,16 @@ climax_numeric_features_context <- climax_numeric_features %>%
 pca_climax_numeric_features <- princomp(climax_numeric_features[,1:25], cor=TRUE)
 pca_climax_numeric_features_context <- princomp(climax_numeric_features_context[,1:25], cor=TRUE)
 
-
-g4.2 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.2 <- g4.2 + ggtitle("(b) Climax screams")+
+library(ggbiplot)
+g3.3 <- ggbiplot(pca_climax_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.3 <- g3.3 + ggtitle("(c) Climax scream features")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=climax_numeric_features$Community, shape=climax_numeric_features$Community), size = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         #legend.direction = 'horizontal', 
         legend.position = 'none', 
         legend.title = element_blank(),
@@ -586,16 +596,17 @@ g4.2 <- g4.2 + ggtitle("(b) Climax screams")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-9,4.5)
-g4.2
+g3.3
 
-g3.2 <- ggbiplot(pca_climax_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.2 <- g3.2 + ggtitle("(b) Climax screams")+
+g2.3 <- ggbiplot(pca_climax_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=climax_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.3 <- g2.3 + ggtitle("(c) Climax scream features")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=climax_numeric_features_context$Context, shape=climax_numeric_features_context$Context), size = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         #legend.direction = 'horizontal', 
         legend.position = 'none', 
         legend.title = element_blank(),
@@ -605,10 +616,11 @@ g3.2 <- g3.2 + ggtitle("(b) Climax screams")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) + ylim(-4,12)
-g3.2
+g2.3
 
 # PCA on complete features and plots
-
+detach(package:ggbiplot)
+detach(package:plyr)
 complete_numeric_features <- complete_calls %>% 
   dplyr::select(all_of(structural_features_numeric), all_of(climax_features), all_of(buildup_features)) %>% 
   dplyr::select_if(is.numeric) %>% 
@@ -631,36 +643,38 @@ pca_complete_numeric_features_individual_kasekela <- princomp(complete_numeric_f
 pca_complete_numeric_features_individual_mitumba <- princomp(complete_numeric_features_individual_mitumba[,1:41], cor=TRUE)
 pca_complete_numeric_features_individual_kanyawara <- princomp(complete_numeric_features_individual_kanyawara[,1:63], cor=TRUE)
 
-
-g3.3 <- ggbiplot(pca_complete_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g3.3 <- g3.3 + ggtitle("(c) All acoustic features")+
+library(ggbiplot)
+g2.4 <- ggbiplot(pca_complete_numeric_features_context, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_context$Context, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g2.4 <- g2.4 + ggtitle("(d) All acoustic features")+
   scale_color_manual(name="Context", values=c("orange", "purple")) +  
   scale_shape_manual(name="Context", values=c(17,18)) +
   geom_point(aes(colour=complete_numeric_features_context$Context, shape=complete_numeric_features_context$Context), size = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.direction = 'vertical', 
-        legend.position = 'right', 
+        panel.border = element_rect(colour = "black", size=1),
+        #legend.direction = 'vertical', 
+        legend.position = 'none', 
         legend.title = element_blank(),
-        legend.text=element_text(size=14),
+        legend.text=element_text(size=18),
         plot.title = element_text(size=18),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
-g3.3
+g2.4
 
-g4.3 <- ggbiplot(pca_complete_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
-g4.3 <- g4.3 + ggtitle("(c) All acoustic features")+
+g3.4 <- ggbiplot(pca_complete_numeric_features, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features$Community, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
+g3.4 <- g3.4 + ggtitle("(d) All acoustic features")+
   scale_color_manual(name="Community", values=c("red", "#008080", "yellowgreen")) +  
   scale_shape_manual(name="Community", values=c(17,18,19)) +
   geom_point(aes(colour=complete_numeric_features$Community, shape=complete_numeric_features$Community), size = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.direction = 'vertical', 
-        legend.position = 'right', 
+        panel.border = element_rect(colour = "black", size=1),
+        #legend.direction = 'vertical', 
+        legend.position = 'none', 
         legend.title = element_blank(),
         legend.text=element_text(size=14),
         plot.title = element_text(size=18),
@@ -668,7 +682,7 @@ g4.3 <- g4.3 + ggtitle("(c) All acoustic features")+
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16)) #+ xlim(-18, 4)
-g4.3
+g3.4
 
 g5.1 <- ggbiplot(pca_complete_numeric_features_individual_kasekela, choices = 1:2, obs.scale=1, var.scale=1, groups=complete_numeric_features_individual_kasekela$Individual, var.axes = FALSE, ellipse = TRUE, circle = TRUE)
 g5.1 <- g5.1 + ggtitle("(a) Kasekela")+
