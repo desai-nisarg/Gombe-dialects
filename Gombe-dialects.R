@@ -575,6 +575,7 @@ climax_numeric_features_context <- climax_numeric_features %>%
   dplyr::filter(Context != "Display", Context != "Resting")
 
 pca_climax_numeric_features <- princomp(climax_numeric_features[,1:25], cor=TRUE)
+pca_climax_numeric_features$loadings
 pca_climax_numeric_features_context <- princomp(climax_numeric_features_context[,1:25], cor=TRUE)
 
 library(ggbiplot)
@@ -796,7 +797,9 @@ pdfa_context_structural
 ImpVars_context_structural <- repDFA(as.data.frame(pca_scores_pdfa_context_structural), testfactor = "Context", balancefactor = c("Context", "Caller"), varnames = vars_pdfa_context_structural,
               npercomb = 3, nrand = 1000)
 table(ImpVars_context_structural$df1_best)
-pca_pdfa_context_structural$loadings
+sort(abs(loadings(pca_pdfa_context_structural)[,6]), decreasing = T)
+sort(abs(loadings(pca_pdfa_context_structural)[,1]), decreasing = T)
+
 
 # ON SRRUCTURAL FEATURES OF GOMBE
 
@@ -1121,21 +1124,74 @@ pdfa_data_community_climaxes %>% group_by(Community) %>% count
 a<-pdfa_data_community_climaxes %>% group_by(Community, Caller) %>% count
 a %>% ungroup() %>% group_by(Community) %>% summarise(range = range(n), median = median(n))
 
-vars_pdfa_community_climaxes <- names(pdfa_data_community_climaxes[,4:28])
+pca_pdfa_community_climaxes <- princomp(pdfa_data_community_climaxes[,4:28], cor = T)
+screeplot(pca_pdfa_community_climaxes, npcs = 20, type = "lines")
+summary(pca_pdfa_community_climaxes)
 
-set.seed(99) #p=0.016
+pca_scores_pdfa_community_climaxes <- as_tibble(pca_pdfa_community_climaxes$scores)
+pca_scores_pdfa_community_climaxes <- pca_scores_pdfa_community_climaxes %>% 
+  add_column(Caller = pdfa_data_community_climaxes$Caller, Community = pdfa_data_community_climaxes$Community)
+
+
+vars_pdfa_community_climaxes <- names(pca_scores_pdfa_community_climaxes[,1:13])
+
+set.seed(99) #p=0.016/7
 pdfa_community_climaxes <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                         variables=vars_pdfa_community_climaxes, 
                         restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                         n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                        pdfa.data=as.data.frame(pdfa_data_community_climaxes))
+                        pdfa.data=as.data.frame(pca_scores_pdfa_community_climaxes))
 pdfa_community_climaxes
 
 
-ImpVars_community_climaxes <- repDFA(as.data.frame(pdfa_data_community_climaxes), testfactor = "Community", balancefactor = c("Caller","Community"), varnames = vars_pdfa_community_climaxes,
-                                     npercomb = 8, nrand = 1000)
-table(ImpVars_context_structura$df1_best)
+# dfares <- candisc(lm(as.matrix(a[, vars_pdfa_community_climaxes]) ~ as.matrix(a[, "Community"])))
+# strucmat <- dfares$structure
+# rownames(strucmat)[which.max(abs(strucmat[, 1]))]
+# round(strucmat[, 1][which.max(abs(strucmat[, 1]))], 3)
 
+ImpVars_community_climaxes <- repDFA_nested(as.data.frame(pca_scores_pdfa_community_climaxes), testfactor = "Community", balancefactor = c("Community", "Caller"), varnames = vars_pdfa_community_climaxes,
+                                     npercomb = 8, nrand = 1000)
+table(ImpVars_community_climaxes$df1_best)
+table(ImpVars_community_climaxes$df2_best)
+sort(abs(loadings(pca_pdfa_community_climaxes)[,4]), decreasing = T)
+sort(abs(loadings(pca_pdfa_community_climaxes)[,2]), decreasing = T)
+sort(abs(loadings(pca_pdfa_community_climaxes)[,1]), decreasing = T)
+ImpVars_community_climaxes
+
+hist(climax_numeric_features$trfak_1)
+hist(climax_numeric_features$duration_1)
+hist(climax_numeric_features$F0loc_1)
+hist(log(climax_numeric_features$Pfmaxdif_1))
+hist(climax_numeric_features$noise_mean_1)
+hist(climax_numeric_features$noise_max_1)
+
+library(lmerTest)
+
+Clitrfak <- lmer(trfak_1 ~ Community + (1|Individual), data = climax_numeric_features)
+summary(Clitrfak)
+
+Clidur <- lmer(duration_1 ~ Community + (1|Individual), data = climax_numeric_features)
+summary(Clidur)
+
+CliF0loc <- lmer(F0loc_1 ~ Community + (1|Individual), data = climax_numeric_features)
+summary(CliF0loc)
+
+Clinoisemean <- lmer(noise_mean_1 ~ Community + (1|Individual), data = climax_numeric_features)
+summary(Clinoisemean)
+
+Clinoisemax <- lmer(noise_max_1 ~ Community + (1|Individual), data = climax_numeric_features)
+summary(Clinoisemax)
+
+CliPfmaxdif <- lmer(Pfmaxdif_1 ~ Community + (1|Individual), data = climax_numeric_features)
+summary(CliPfmaxdif)
+
+p<- c(0.8347,0.0392,0.612,0.179,0.5726,0.0864,0.00443,5.85e-07,3.55e-06,2.67e-08,0.000216,0.662041)
+
+p.adjust(p, "BH")
+
+# x<-c("Community", "Caller")
+# 
+# a<-pdfa_data_community_climaxes %>% group_by(.dots = x) %>% sample_n(8) 
 
 # ON CLIMAXES OF GOMBE
 
@@ -1326,6 +1382,7 @@ range(b$n)
 
 pca_pdfa_individual_structural <- princomp(structural_numeric_features_individual[,1:14], cor = T)
 screeplot(pca_pdfa_individual_structural, type = "lines")
+pca_pdfa_individual_structural$loadings
 
 pca_scores_pdfa_individual_structural <- as_tibble(pca_pdfa_individual_structural$scores)
 pca_scores_pdfa_individual_structural <- pca_scores_pdfa_individual_structural %>% 
@@ -1342,6 +1399,22 @@ pdfa_individual_structural_NoControl=pDFA.nested(test.fac="Caller", #contr.fac =
                                         n.sel=100, n.perm=1000, 
                                         pdfa.data=as.data.frame(pca_scores_pdfa_individual_structural))
 pdfa_individual_structural_NoControl
+
+# library(candisc)
+# 
+# a<-pca_scores_pdfa_individual_structural %>% group_by(Caller) %>% sample_n(4)
+# dfares <- candisc(lm(as.matrix(a[, vars_pdfa_individual_structural]) ~ as.matrix(a[, "Caller"])))
+# strucmat <- dfares$structure
+# rownames(strucmat)[which.max(abs(strucmat[, 1]))]
+# round(strucmat[, 1][which.max(abs(strucmat[, 1]))], 3)
+
+ImpVars_individual_structural <- repDFA_nested(as.data.frame(pca_scores_pdfa_individual_structural), testfactor = "Caller", balancefactor = c("Caller"), varnames = vars_pdfa_individual_structural,
+                                       npercomb = 4, nrand = 1000)
+table(ImpVars_individual_structural$df1_best)
+table(ImpVars_individual_structural$df2_best)
+sort(abs(loadings(pca_pdfa_individual_structural)[,2]), decreasing = T)
+sort(abs(loadings(pca_pdfa_individual_structural)[,7]), decreasing = T)
+
 
 # ON STRUCTURAL NUMERIC FEATURES OF GOMBE
 
@@ -1361,6 +1434,7 @@ range(b$n)
 
 pca_pdfa_individual_structural_gombe <- princomp(structural_numeric_features_individual_gombe[,1:14], cor = T)
 screeplot(pca_pdfa_individual_structural_gombe, type = "lines")
+pca_pdfa_individual_structural_gombe$loadings
 
 pca_scores_pdfa_individual_structural_gombe <- as_tibble(pca_pdfa_individual_structural_gombe$scores)
 pca_scores_pdfa_individual_structural_gombe <- pca_scores_pdfa_individual_structural_gombe %>% 
@@ -1378,6 +1452,12 @@ pdfa_individual_structural_gombe=pDFA.nested(test.fac="Caller", #contr.fac = "Co
 
 pdfa_individual_structural_gombe #Context controlled is not possible due to low sample sizes
 
+ImpVars_individual_structural_gombe <- repDFA_nested(as.data.frame(pca_scores_pdfa_individual_structural_gombe), testfactor = "Caller", balancefactor = c("Caller"), varnames = vars_pdfa_individual_structural_gombe,
+                                          npercomb = 4, nrand = 1000)
+table(ImpVars_individual_structural_gombe$df1_best)
+table(ImpVars_individual_structural_gombe$df2_best)
+
+
 # ON CLIMAXES
 
 pdfa_data_individual_climaxes <- 
@@ -1393,6 +1473,7 @@ pdfa_data_individual_climaxes %>% group_by(Community, Caller) %>% count
 pca_pdfa_individual_climaxes <- princomp(pdfa_data_individual_climaxes[,4:28], cor = T)
 summary(pca_pdfa_individual_climaxes)
 screeplot(pca_pdfa_individual_climaxes, npcs = 10,type = "lines")
+pca_pdfa_individual_climaxes$loadings
 
 pca_scores_pdfa_individual_climaxes <- as_tibble(pca_pdfa_individual_climaxes$scores)
 pca_scores_pdfa_individual_climaxes <- pca_scores_pdfa_individual_climaxes %>% 
@@ -1406,6 +1487,15 @@ pdfa_individual_climaxes <- pDFA.nested(test.fac="Caller",
                                         restrict.by="Community", n.contr.fac.levels.to.sel=NULL, n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
                                         pdfa.data=as.data.frame(pca_scores_pdfa_individual_climaxes))
 pdfa_individual_climaxes
+
+ImpVars_individual_climaxes <- repDFA_nested(as.data.frame(pca_scores_pdfa_individual_climaxes), testfactor = "Caller", balancefactor = c("Caller"), varnames = vars_pdfa_individual_climaxes,
+                                                npercomb = 8, nrand = 1000)
+table(ImpVars_individual_climaxes$df1_best)
+table(ImpVars_individual_climaxes$df2_best)
+sort(abs(loadings(pca_pdfa_individual_climaxes)[,1]), decreasing = T)
+sort(abs(loadings(pca_pdfa_individual_climaxes)[,3]), decreasing = T)
+
+
 
 # ON CLIMAXES OF GOMBE
 
@@ -1512,6 +1602,7 @@ pdfa_data_individual_complete %>%
 pca_pdfa_individual_complete <- princomp(pdfa_data_individual_complete[,4:66], cor = T)
 summary(pca_pdfa_individual_complete)
 screeplot(pca_pdfa_individual_complete, type = "lines")
+pca_pdfa_individual_complete$loadings
 
 pca_scores_pdfa_individual_complete <- as_tibble(pca_pdfa_individual_complete$scores)
 pca_scores_pdfa_individual_complete <- pca_scores_pdfa_individual_complete %>% 
@@ -1527,6 +1618,15 @@ pdfa_individual_complete <- pDFA.nested(test.fac="Caller",
                                        n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
                                        pdfa.data=as.data.frame(pca_scores_pdfa_individual_complete))
 pdfa_individual_complete
+
+ImpVars_individual_complete <- repDFA_nested(as.data.frame(pca_scores_pdfa_individual_complete), testfactor = "Caller", balancefactor = c("Caller"), varnames = vars_pdfa_individual_complete,
+                                             npercomb = 3, nrand = 1000)
+table(ImpVars_individual_complete$df1_best)
+table(ImpVars_individual_complete$df2_best)
+sort(abs(loadings(pca_pdfa_individual_complete)[,2]), decreasing = T)
+sort(abs(loadings(pca_pdfa_individual_complete)[,3]), decreasing = T)
+sort(abs(loadings(pca_pdfa_individual_complete)[,1]), decreasing = T)
+
 
 # ON COMPLETE CALLS OF GOMBE
 
@@ -1556,6 +1656,8 @@ pdfa_individual_complete_gombe <- pDFA.nested(test.fac="Caller",
                                              n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
                                              pdfa.data=as.data.frame(pca_scores_pdfa_individual_complete_gombe))
 pdfa_individual_complete_gombe
+
+
 
 
 
