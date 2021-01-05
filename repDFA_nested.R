@@ -1,4 +1,5 @@
 repDFA_nested <- function(xdata, testfactor, balancefactor, varnames, npercomb = NULL, nrand = 20) {
+  library(candisc)
   # empty matrix for storing the results
   res <- matrix(ncol = 7, nrow = nrand)
   colnames(res) <- c("rand", "df1_best", "df1_load", "df1_pct", "df2_best", "df2_load", "df2_pct")
