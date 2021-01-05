@@ -1,3 +1,15 @@
+####----INTRODUCTION----#####
+# Manuscript title: "Chimpanzee pant-hoots encode individual but not group differences"
+# Manuscript authors: Nisarg Desai, Pawel Fedurek, Katie Slocombe, Michael Wilson
+# Code author: Nisarg Desai. Utilized functions written by Roger Mundry and Christof Neumann
+# Last update: 05 January 2021
+
+
+# Note to the user: Must run essential code till line 62 before anything else. 
+# Every other section can be run independently after the essential code is run. 
+# Each new section begins with 7 #'s (#######)
+
+#######----ESSENTIAL CODE----######
 setwd("~/Desktop/Nisarg files/Gombe-dialects/")
 rm(list = ls())
 
@@ -50,9 +62,9 @@ structural_features_numeric <- names(structural_numeric_features[,1:14])
 structural_numeric_features %>% skimr::skim()
 
 
-########-------EXPLORATORY PLOTS-------########
+#######-------EXPLORATORY PLOTS-------########
 
-# SKIP TO LINE 362 FOR ANALYSIS
+# SKIP TO LINE 374 FOR ANALYSIS
 
 library(ggplot2)
 
@@ -360,7 +372,7 @@ dialects %>%
   geom_bar(position = "fill") + facet_wrap(~Community, scales = "free")
 
 #######----PRINCIPAL COMPONENTS ANALYSIS AND PLOTS FOR PUBLICATION----###### 
-### SKIP TO LINE 670 FOR pDFAs
+### SKIP TO LINE 682 FOR pDFAs
 # library(devtools)
 # install_github("vqv/ggbiplot")
 
@@ -667,7 +679,7 @@ g5.3 <- g5.3 + ggtitle("(c) Kanyawara")+
         axis.title.y = element_text(size=16)) + coord_flip() + xlim(-4,4)
 g5.3
 
-######----pDFAs-----###### 
+#######----pDFAs-----###### 
 detach(package:ggbiplot)
 detach(package:plyr)
 source("~/Desktop/Nisarg files/Dialects/rercodeforpdfa/pdfa_functions.r")
