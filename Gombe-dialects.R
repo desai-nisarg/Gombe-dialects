@@ -847,7 +847,7 @@ pdfa_context_climaxes_gombe
 
 # Data cleaning
 pdfa_data_context_buildups <- 
-  dialects %>% dplyr::select(Community, Caller, Context, all_of(buildup_features), -call, -durat2, -select) %>%  ##, -noise_mean_1, -noise_max_1, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  dialects %>% dplyr::select(Community, Caller, Context, all_of(buildup_features), -call, -durat2, -select) %>% 
   filter(!is.na(duration), !is.na(Context))
 
 pdfa_data_context_buildups <- pdfa_data_context_buildups %>% filter(Context != "Display", Context != "Resting")
@@ -1063,7 +1063,7 @@ pdfa_community_structural_gombe_CallerControlled
 
 # Data cleaning
 pdfa_data_community_climaxes <- 
-  dialects %>% dplyr::select(Community, Caller, Context, all_of(climax_features), -call_1, -durat2_1, -select_1) %>% #, -Pfmaxamp_1, -Pfminamp_1, -F0start_1, -F0end_1, -Pfstart_1, -Pfend_1) %>% 
+  dialects %>% dplyr::select(Community, Caller, Context, all_of(climax_features), -call_1, -durat2_1, -select_1) %>% 
   filter(!is.na(duration_1), !is.na(Context))
 
 # Feature summary
