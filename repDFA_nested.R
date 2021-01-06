@@ -1,3 +1,6 @@
+## Original author Christof Neumann. 
+# Modified by Nisarg Desai for the manuscript "Chimpanzee pant-hoots encode individual but not group differences"
+
 repDFA_nested <- function(xdata, testfactor, balancefactor, varnames, npercomb = NULL, nrand = 20) {
   library(candisc)
   # empty matrix for storing the results
