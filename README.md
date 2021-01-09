@@ -1,9 +1,9 @@
 ## INTRODUCTION
 
 ##### Manuscript title: "Chimpanzee pant-hoots encode individual but not group differences"
-##### Manuscript authors: Nisarg Desai, Pawel Fedurek, Katie Slocombe, Michael Wilson
-##### Code author: Nisarg Desai. Utilized functions written by Roger Mundry and Christof Neumann
-##### Last update: 05 January 2021
+Manuscript authors: Nisarg Desai, Pawel Fedurek, Katie Slocombe, Michael Wilson
+Code author: Nisarg Desai. Utilized functions written by Roger Mundry and Christof Neumann
+Last update: 05 January 2021
+Status: Manuscript in preparation
 
-
-Requires proprietary code to run permuted discriminant functions analysis available from Dr. Roger Mundry. Datasheet available publically, and audio recordings available at reasonable request to the corresponding author. 
+The repo contains data extractracted form spectrogram representations of chimpanzee pant-hoot vocalizations and code to perform the analyses to explore the existence of vocal dialects. The code requires proprietary functions to run permuted discriminant functions analysis (pDFA) available from Dr. Roger Mundry. The datasheet is available publically, and audio recordings available at reasonable request to the corresponding author. 
