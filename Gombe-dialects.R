@@ -10,9 +10,6 @@
 # Each new section begins with 7 #'s (#######)
 
 #######----ESSENTIAL CODE----######
-setwd("~/Desktop/Nisarg files/Gombe-dialects/")
-rm(list = ls())
-
 library(tidyverse)
 
 # Read and clean data
@@ -749,6 +746,8 @@ structural_numeric_features_context_gombe <- structural_numeric_features_context
   filter(Community != "Kanyawara")
 
 a<-structural_numeric_features_context_gombe %>% group_by(Context, Caller) %>% count
+a %>% ungroup() %>% group_by(Context) %>% 
+  summarize(mean = mean(n), median = median(n), range = range(n))
 
 # PCA to reduce number of features
 pca_pdfa_context_structural_gombe <- princomp(structural_numeric_features_context_gombe[,1:14], cor = T)
@@ -831,7 +830,10 @@ pdfa_context_climaxes
 # Data cleaning
 pdfa_data_context_climaxes_gombe <- pdfa_data_context_climaxes %>% filter(Community != "Kanyawara")
 
-pdfa_data_context_climaxes_gombe %>% group_by(Context, Caller) %>% count
+a<-pdfa_data_context_climaxes_gombe %>% group_by(Context, Caller) %>% count 
+a # 6 individuals with at least 3 calls in both contexts
+a %>% ungroup() %>% group_by(Context) %>% 
+  summarize(mean = mean(n), median = median(n), range = range(n))
 
 # PCA to reduce number of features
 pca_pdfa_context_climaxes_gombe <- princomp(pdfa_data_context_climaxes_gombe[,4:28], cor = T)
@@ -903,7 +905,11 @@ pdfa_context_buildups
 # Data cleaning
 pdfa_data_context_buildups_gombe <- pdfa_data_context_buildups %>% filter(Community != "Kanyawara")
 
-pdfa_data_context_buildups_gombe %>% group_by(Context, Caller) %>% count
+a<-pdfa_data_context_buildups_gombe %>% group_by(Context, Caller) %>% count
+a # 5 individuals with at least 3 calls in both contexts
+a %>% ungroup() %>% group_by(Context) %>% 
+  summarize(mean = mean(n), median = median(n), range = range(n))
+
 
 # PCA to reduce number of features
 pca_pdfa_context_buildups_gombe <- princomp(pdfa_data_context_buildups_gombe[,4:27], cor = T)
