@@ -2,7 +2,6 @@
 # Manuscript title: "Chimpanzee pant-hoots encode individual but not group differences"
 # Manuscript authors: Nisarg Desai, Pawel Fedurek, Katie Slocombe, Michael Wilson
 # Code author: Nisarg Desai. Utilized functions written by Roger Mundry and Christof Neumann
-# Last update: 05 January 2021
 
 
 # Note to the user: Must run essential code till line 62 before anything else. 
@@ -59,9 +58,9 @@ structural_features_numeric <- names(structural_numeric_features[,1:14])
 structural_numeric_features %>% skimr::skim()
 
 
-#######-------EXPLORATORY PLOTS-------########
+#######-------EXPLORATORY PLOTS AND SUPPLEMENTARY FIGURES-------########
 
-# SKIP TO LINE 374 FOR ANALYSIS
+# SKIP TO LINE 600 FOR ANALYSIS
 
 library(ggplot2)
 
@@ -69,6 +68,7 @@ dialects %>% group_by(Community, Caller) %>%
   count(Caller) %>% 
   ggplot(aes(x=fct_reorder(Caller, n, .desc = T), y = n, fill = Community)) + xlab("Caller") + ylab("Number of calls") +
   geom_col(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() + 
   theme(strip.text.x = element_text(size = 14),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
@@ -79,16 +79,26 @@ dialects %>% group_by(Community, Caller) %>%
 
 dialects %>% 
   ggplot(aes(y=`Duration (B to L)`, x = Community, color = Community)) + ylab("Buildup to Letdown duration (s)") +
+  scale_color_manual(name="Community", values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = FALSE) + geom_jitter(show.legend = FALSE) +# facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Duration (B to L)`, x = Caller, color = Community)) + ylab("Buildup to Letdown duration (s)") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) + 
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -101,8 +111,12 @@ dialects %>%
   filter(!is.na(`Buildup present`)) %>% 
   ggplot(aes(fill=`Buildup present`, x=Community)) + ylab("Proportion of calls") +
   geom_bar(position = "fill") + #facet_wrap(~Community, scales = "free")
+  theme_bw() + 
   theme(legend.title=element_text(size=14),
         legend.text=element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -111,11 +125,15 @@ dialects %>%
 dialects %>% 
   filter(!is.na(`Buildup present`)) %>% 
   ggplot(aes(fill=`Buildup present`, x=Caller)) + ylab("Proportion of calls") +
-  geom_bar(position = "fill") + 
-  facet_wrap(~Community, scales = "free") +
+  geom_bar(position = "fill", show.legend = F) + 
+  facet_wrap(~Community, scales = "free_x") +
+  theme_bw() + 
   theme(legend.title=element_text(size=14),
         legend.text=element_text(size=14),
         strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -123,33 +141,56 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Buildup E components`, x = Community, color = Community)) + ylab("Buildup components (exhalation)") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) +# facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
-        axis.text.y = element_text(size=14),
-        axis.title.x = element_text(size=16),
-        axis.title.y = element_text(size=16))
-
-dialects %>% 
-  ggplot(aes(y=`Buildup E components`, x = Caller, color = Community)) + ylab("Buildup components (exhalation)") +
-  geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
+  ggplot(aes(y=`Buildup E components`, x = Caller, color = Community)) + ylab("Buildup components (exhalation)") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
+  geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+
+dialects %>% 
   ggplot(aes(y=`Rate of buildup`, x = Community, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = FALSE) + geom_jitter(show.legend = FALSE) +# facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Rate of buildup`, x = Caller, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -157,38 +198,33 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Buildup duration`, x = Community, color = Community)) + ylab("Buildup duration (s)") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = FALSE) + geom_jitter(show.legend = FALSE) +# facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Buildup duration`, x = Caller, color = Community)) + ylab("Buildup duration (s)") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
-  ggplot(aes(y=Acceleration, x = Caller, color = Community)) + ylab("Buildup acceleration") +
-  geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
-  theme(strip.text.x = element_text(size = 14),
-        axis.text.x = element_text(size=14),
-        axis.text.y = element_text(size=14),
-        axis.title.x = element_text(size=16),
-        axis.title.y = element_text(size=16))
 
-dialects %>% 
-  ggplot(aes(y=Acceleration, x = Community, color = Community)) + ylab("Buildup acceleration") +
-  geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) +# facet_wrap(~Community, scales = "free_x") +
-  theme(strip.text.x = element_text(size = 14),
-        axis.text.x = element_text(size=14),
-        axis.text.y = element_text(size=14),
-        axis.title.x = element_text(size=16),
-        axis.title.y = element_text(size=16))
 
 ## CLIMAX
 
@@ -200,16 +236,27 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Climax screams`, x = Community, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + #facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Climax screams`, x = Caller, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -217,16 +264,27 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Climax components`, x = Community, color = Community)) + ylab("Climax screams + barks + hoos") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + #facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Climax components`, x = Caller, color = Community)) + ylab("Climax screams + barks + hoos") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -234,8 +292,13 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Durclx`, x = Caller, color = Community)) + ylab("Climax duration (s)") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -243,24 +306,41 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Durclx`, x = Community, color = Community)) + ylab("Climax duration (s)") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) +# facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Prop of screams`, x = Community, color = Community)) + ylab("Proportion of climax screams") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + #facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Prop of screams`, x = Caller, color = Community)) + ylab("Proportion of climax screams") +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -274,9 +354,13 @@ dialects %>%
   ggplot(aes(fill=`Letdown present`, x=Community)) + ylab("Proportion of calls") +
   geom_bar(position = "fill") + 
   #facet_wrap(~Community, scales = "free")
-  theme(legend.title=element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.title=element_text(size=14),
         legend.text=element_text(size=14),
-        strip.text.x = element_text(size = 14),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -285,11 +369,13 @@ dialects %>%
 dialects %>% 
   filter(!is.na(`Letdown present`)) %>%
   ggplot(aes(fill=`Letdown present`, x=Caller)) + ylab("Proportion of calls") +
-  geom_bar(position = "fill") + 
-  facet_wrap(~Community, scales = "free") +
-  theme(legend.title=element_text(size=14),
-        legend.text=element_text(size=14),
-        strip.text.x = element_text(size = 14),
+  geom_bar(position = "fill", show.legend = F) + 
+  facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -297,16 +383,27 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Letdown components`, x = Community, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) +# facet_wrap(~Community, scales = "free_x")
-  theme(axis.text.x = element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
 dialects %>% 
   ggplot(aes(y=`Letdown components`, x = Caller, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -318,9 +415,13 @@ dialects %>%
   filter(!is.na(`Drumming`)) %>%
   ggplot(aes(fill=Drumming, x=Community)) + ylab("Drumming present") +
   geom_bar(position = "fill") + #facet_wrap(~Community, scales = "free") +
-  theme(legend.title=element_text(size=14),
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.title=element_text(size=14),
         legend.text=element_text(size=14),
-        strip.text.x = element_text(size = 14),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -329,10 +430,14 @@ dialects %>%
 dialects %>% 
   filter(!is.na(`Drumming`)) %>%
   ggplot(aes(fill=Drumming, x=Caller)) + ylab("Drumming present") +
-  geom_bar(position = "fill") + facet_wrap(~Community, scales = "free") +
-  theme(legend.title=element_text(size=14),
+  geom_bar(position = "fill", show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.title=element_text(size=14),
         legend.text=element_text(size=14),
-        strip.text.x = element_text(size = 14),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -340,8 +445,15 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Drum beats`, x = Community, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + #facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.title=element_text(size=14),
+        legend.text=element_text(size=14),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -349,8 +461,15 @@ dialects %>%
 
 dialects %>% 
   ggplot(aes(y=`Drum beats`, x = Caller, color = Community)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
   theme(strip.text.x = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.title=element_text(size=14),
+        legend.text=element_text(size=14),
+        panel.border = element_rect(colour = "black", size=1),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
         axis.title.x = element_text(size=16),
@@ -368,8 +487,118 @@ dialects %>%
   ggplot(aes(fill=`Non linearities`, x=Caller)) +
   geom_bar(position = "fill") + facet_wrap(~Community, scales = "free")
 
+## FIGURES S2
+
+dialects <- dialects %>% add_column(Allcommunities = "All communities")
+
+dialects %>%
+  filter(Context != "Display", Context != "Resting") %>% 
+  ggplot(aes(y=`Letdown components`, x = Caller, color = Context, shape = Context)) + ylab("Letdown components") +
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  geom_boxplot(outlier.shape=NA, show.legend = F) + geom_jitter(show.legend = FALSE) + 
+  facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        strip.text.x = element_text(size = 14),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+dialects %>%
+  filter(Context != "Display", Context != "Resting") %>% 
+  ggplot(aes(y=`Letdown components`, x = Context, color = Context, shape = Context)) + ylab("Letdown components") +
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  geom_boxplot(outlier.shape=NA, show.legend = T) + geom_jitter(show.legend = T) + 
+  facet_wrap(~Allcommunities, scales = "free_x") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        strip.text.x = element_text(size = 14),
+        legend.background = element_rect(colour = 'black', size = 0.5),
+        legend.title = element_text(size=18),
+        legend.text=element_text(size=18),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+dialects %>%
+  filter(Context != "Display", Context != "Resting") %>% 
+  ggplot(aes(y=`Climax components`, x = Caller, color = Context, shape = Context)) + ylab("Climax components") +
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  geom_boxplot(outlier.shape=NA, show.legend = F) + geom_jitter(show.legend = FALSE) + 
+  facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        strip.text.x = element_text(size = 14),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+dialects %>%
+  filter(Context != "Display", Context != "Resting") %>% 
+  ggplot(aes(y=`Climax components`, x = Context, color = Context, shape = Context)) + ylab("Climax components") +
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  geom_boxplot(outlier.shape=NA, show.legend = T) + geom_jitter(show.legend = T) + 
+  facet_wrap(~Allcommunities, scales = "free_x") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        strip.text.x = element_text(size = 14),
+        legend.background = element_rect(colour = 'black', size = 0.5),
+        legend.title = element_text(size=18),
+        legend.text=element_text(size=18),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+dialects %>%
+  filter(Context != "Display", Context != "Resting") %>% 
+  ggplot(aes(y=`Buildup E components`, x = Caller, color = Context, shape = Context)) + ylab("Buildup components") +
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  geom_boxplot(outlier.shape=NA, show.legend = F) + geom_jitter(show.legend = FALSE) + 
+  facet_wrap(~Community, scales = "free_x") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        strip.text.x = element_text(size = 14),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+dialects %>%
+  filter(Context != "Display", Context != "Resting") %>% 
+  ggplot(aes(y=`Buildup E components`, x = Context, color = Context, shape = Context)) + ylab("Buildup components") +
+  scale_color_manual(name="Context", values=c("orange", "purple")) +  
+  geom_boxplot(outlier.shape=NA, show.legend = T) + geom_jitter(show.legend = T) + 
+  facet_wrap(~Allcommunities, scales = "free_x") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1),
+        strip.text.x = element_text(size = 14),
+        legend.background = element_rect(colour = 'black', size = 0.5),
+        legend.title = element_text(size=18),
+        legend.text=element_text(size=18),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16))
+
+
 #######----PRINCIPAL COMPONENTS ANALYSIS AND PLOTS FOR PUBLICATION----###### 
-### SKIP TO LINE 682 FOR pDFAs
+### SKIP TO LINE 908 FOR pDFAs
 # library(devtools)
 # install_github("vqv/ggbiplot")
 
