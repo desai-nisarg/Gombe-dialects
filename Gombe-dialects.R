@@ -4,7 +4,7 @@
 # Code author: Nisarg Desai. Utilized functions written by Roger Mundry and Christof Neumann
 
 
-# Note to the user: Must run essential code till line 62 before anything else. 
+# Note to the user: Must run the 'essential code' till line 62 before anything else. 
 # Every other section can be run independently after the essential code is run. 
 # Each new section begins with 7 #'s (#######)
 
@@ -1389,7 +1389,7 @@ summary(CliPfmaxdif)
 # Correct p-values for multiple comparisons
 p<- c(0.8347,0.0392,0.612,0.179,0.5726,0.0864,0.00443,5.85e-07,3.55e-06,2.67e-08,0.000216,0.662041)
 p.adjust(p, "BH")
-
+cbind(p, p.adjust(p, "BH"))
 
 # ON CLIMAXES OF GOMBE
 
