@@ -139,7 +139,7 @@ dialects %>%
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
+dialects %>% filter(!is.na(`Buildup component chosen`)) %>% 
   ggplot(aes(y=`Buildup E components`, x = Community, color = Community)) + ylab("Buildup components (exhalation)") +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) +# facet_wrap(~Community, scales = "free_x")
@@ -153,7 +153,7 @@ dialects %>%
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
+dialects %>% filter(!is.na(`Buildup component chosen`)) %>% 
   ggplot(aes(y=`Buildup E components`, x = Caller, color = Community)) + ylab("Buildup components (exhalation)") +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
@@ -168,7 +168,7 @@ dialects %>%
         axis.title.y = element_text(size=16))
 
 
-dialects %>% 
+dialects %>% filter(!is.na(`Buildup component chosen`)) %>% 
   ggplot(aes(y=`Rate of buildup`, x = Community, color = Community)) +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = FALSE) + geom_jitter(show.legend = FALSE) +# facet_wrap(~Community, scales = "free_x")
@@ -182,7 +182,7 @@ dialects %>%
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
+dialects %>% filter(!is.na(`Buildup component chosen`)) %>% 
   ggplot(aes(y=`Rate of buildup`, x = Caller, color = Community)) +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
@@ -196,7 +196,7 @@ dialects %>%
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
+dialects %>% filter(!is.na(`Buildup component chosen`)) %>% 
   ggplot(aes(y=`Buildup duration`, x = Community, color = Community)) + ylab("Buildup duration (s)") +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = FALSE) + geom_jitter(show.legend = FALSE) +# facet_wrap(~Community, scales = "free_x")
@@ -210,7 +210,7 @@ dialects %>%
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
+dialects %>% filter(!is.na(`Buildup component chosen`)) %>% 
   ggplot(aes(y=`Buildup duration`, x = Caller, color = Community)) + ylab("Buildup duration (s)") +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
@@ -290,7 +290,7 @@ dialects %>%
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
+dialects %>% filter(!is.na(`Climax scream chosen`)) %>% 
   ggplot(aes(y=`Durclx`, x = Caller, color = Community)) + ylab("Climax duration (s)") +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) + facet_wrap(~Community, scales = "free_x") +
@@ -304,7 +304,7 @@ dialects %>%
         axis.title.x = element_text(size=16),
         axis.title.y = element_text(size=16))
 
-dialects %>% 
+dialects %>% filter(!is.na(`Climax scream chosen`)) %>% 
   ggplot(aes(y=`Durclx`, x = Community, color = Community)) + ylab("Climax duration (s)") +
   scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73")) +
   geom_boxplot(show.legend = F) + geom_jitter(show.legend = F) +# facet_wrap(~Community, scales = "free_x")
