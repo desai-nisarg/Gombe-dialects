@@ -1,10 +1,10 @@
 ####----INTRODUCTION----#####
-# Manuscript title: "Chimpanzee pant-hoots encode individual but not group differences"
-# Manuscript authors: Nisarg Desai, Pawel Fedurek, Katie Slocombe, Michael Wilson
-# Code author: Nisarg Desai. Utilized functions written by Roger Mundry and Christof Neumann
+# Manuscript title: "Chimpanzee pant-hoots encode information about individual but not group differences"
+# Manuscript authors: Nisarg P. Desai, Pawel Fedurek, Katie E. Slocombe, Michael L. Wilson
+# Code author: Nisarg P. Desai. Utilized functions written by Roger Mundry and Christof Neumann
 
 
-# Note to the user: Must run the 'essential code' till line 62 before anything else. 
+# Note to the user: Must run the 'essential code' till line 60 before anything else. 
 # Every other section can be run independently after the essential code is run. 
 # Each new section begins with 7 #'s (#######)
 
