@@ -600,7 +600,7 @@ dialects %>%
 #######----PRINCIPAL COMPONENTS ANALYSIS AND PLOTS FOR PUBLICATION----###### 
 ### SKIP TO LINE 908 FOR pDFAs
 # library(devtools)
-# install_github("vqv/ggbiplot")
+# install_github("vqv/ggbiplot") #install ggbiplot
 
 ##PCA on structural features and plot
 
@@ -908,7 +908,7 @@ g5.3
 #######----pDFAs-----###### 
 detach(package:ggbiplot)
 detach(package:plyr)
-source("~/Desktop/Nisarg files/Dialects/rercodeforpdfa/pdfa_functions.r")
+source("pdfa_functions.r") # Proprietary functions to perform pDFAs by Roger Mundry
 devtools::install_github("gobbios/cfp")
 library(cfp)
 
