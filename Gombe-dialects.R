@@ -909,7 +909,7 @@ g5.3
 detach(package:ggbiplot)
 detach(package:plyr)
 source("pdfa_functions.r") # Proprietary functions to perform pDFAs by Roger Mundry
-devtools::install_github("gobbios/cfp")
+devtools::install_github("gobbios/cfp") # Christof's functions package for repDFA()
 library(cfp)
 
 #######------pDFA FOR CONTEXT------#######
