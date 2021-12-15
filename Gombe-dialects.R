@@ -1111,6 +1111,20 @@ a # 9 individuals with at least 3 calls in both contexts
 a %>% ungroup() %>% group_by(Context) %>% 
   summarize(mean = mean(n), median = median(n), range = range(n))
 
+# PCA to reduce number of features
+pca_pdfa_context_buildups <- princomp(pdfa_data_context_buildups[,4:27], cor = T)
+summary(pca_pdfa_context_buildups)
+
+# Extract PC scores to use as features in pDFA
+pca_scores_pdfa_context_buildups <- as_tibble(pca_pdfa_context_buildups$scores)
+pca_scores_pdfa_context_buildups <- pca_scores_pdfa_context_buildups %>%
+  add_column(Community = pdfa_data_context_buildups$Community, Caller = pdfa_data_context_buildups$Caller,
+             Context = pdfa_data_context_buildups$Context)
+
+# Variable names to be used in the pDFA
+vars_pdfa_context_buildups <- names(pca_scores_pdfa_context_buildups[,1:24])
+
+
 # Feature summary
 pdfa_data_context_buildups %>% #mutate_if(is.numeric, scale) %>%
   select_if(is.numeric) %>%
@@ -1118,15 +1132,12 @@ pdfa_data_context_buildups %>% #mutate_if(is.numeric, scale) %>%
 
 pdfa_data_context_buildups %>% group_by(Context) %>% count
 
-# Variable names to be used in the pDFA
-vars_pdfa_context_buildups <- names(pdfa_data_context_buildups[,4:27])
-
 # Perform the pDFA
 set.seed(6324) # For repeatable results; p = 0.376
 pdfa_context_buildups=pDFA.crossed(test.fac="Context", contr.fac="Caller",
                                    variables=vars_pdfa_context_buildups, n.to.sel=NULL,
                                    n.sel=100, n.perm=1000, 
-                                   pdfa.data=as.data.frame(pdfa_data_context_buildups))
+                                   pdfa.data=as.data.frame(pca_scores_pdfa_context_buildups))
 pdfa_context_buildups
 
 # ON BUILDPS OF GOMBE
@@ -1368,7 +1379,7 @@ hist(climax_numeric_features$noise_max_1)
 
 library(lmerTest)
 
-Clitrfak <- lmer(trfak_1 ~ Community + (1|Individual), data = climax_numeric_features)
+Clitrfak <- lmer(trfak_1 ~ relevel(factor(Community), ref = "Kasekela") + (1|Individual), data = climax_numeric_features)
 summary(Clitrfak)
 
 Clidur <- lmer(duration_1 ~ Community + (1|Individual), data = climax_numeric_features)
@@ -1383,7 +1394,7 @@ summary(Clinoisemean)
 Clinoisemax <- lmer(noise_max_1 ~ Community + (1|Individual), data = climax_numeric_features)
 summary(Clinoisemax)
 
-CliPfmaxdif <- lmer(Pfmaxdif_1 ~ Community + (1|Individual), data = climax_numeric_features)
+CliPfmaxdif <- lmer(Pfmaxdif_1 ~ relevel(factor(Community), ref = "Kasekela") + (1|Individual), data = climax_numeric_features)
 summary(CliPfmaxdif)
 
 # Correct p-values for multiple comparisons
@@ -1434,13 +1445,25 @@ a %>% ungroup() %>% group_by(Community) %>% summarise(range = range(n), median =
 
 pdfa_data_community_buildups <- pdfa_data_community_buildups %>% filter(Caller != "FAN")
 
+# PCA to reduce number of features
+pca_pdfa_community_buildups <- princomp(pdfa_data_community_buildups[,4:27], cor = T)
+screeplot(pca_pdfa_community_buildups, npcs = 20, type = "lines")
+summary(pca_pdfa_community_buildups)
+
+# Extract PC scores to use as features in pDFA
+pca_scores_pdfa_community_buildups <- as_tibble(pca_pdfa_community_buildups$scores)
+pca_scores_pdfa_community_buildups <- pca_scores_pdfa_community_buildups %>% 
+  add_column(Caller = pdfa_data_community_buildups$Caller, Community = pdfa_data_community_buildups$Community)
+
+
 # Feature summary
 pdfa_data_community_buildups %>% 
   select_if(is.numeric) %>%
   skimr::skim()
 
 # Variable names to be used in the pDFA
-vars_pdfa_community_buildups <- names(pdfa_data_community_buildups[,4:27])
+vars_pdfa_community_buildups <- names(pca_scores_pdfa_community_buildups[,1:24])
+
 
 # Perform the pDFA
 set.seed(95) # For repeatable results; p=0.08
@@ -1448,7 +1471,7 @@ pdfa_community_buildups <- pDFA.nested(test.fac="Community", contr.fac = "Caller
                               variables=vars_pdfa_community_buildups, 
                               restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                               n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                              pdfa.data=as.data.frame(pdfa_data_community_buildups))
+                              pdfa.data=as.data.frame(pca_scores_pdfa_community_buildups))
 pdfa_community_buildups
 
 # ON BUILDUPS OF GOMBE
@@ -1460,13 +1483,24 @@ pdfa_data_community_buildups_gombe <- pdfa_data_community_buildups %>%
 a<-pdfa_data_community_buildups_gombe %>% group_by(Community, Caller) %>% count
 a %>% ungroup() %>% group_by(Community) %>% summarise(range = range(n), median = median(n))
 
+# PCA to reduce number of features
+pca_pdfa_community_buildups_gombe <- princomp(pdfa_data_community_buildups_gombe[,4:27], cor = T)
+screeplot(pca_pdfa_community_buildups_gombe, npcs = 20, type = "lines")
+summary(pca_pdfa_community_buildups_gombe)
+
+# Extract PC scores to use as features in pDFA
+pca_scores_pdfa_community_buildups_gombe <- as_tibble(pca_pdfa_community_buildups_gombe$scores)
+pca_scores_pdfa_community_buildups_gombe <- pca_scores_pdfa_community_buildups_gombe %>% 
+  add_column(Caller = pdfa_data_community_buildups_gombe$Caller, Community = pdfa_data_community_buildups_gombe$Community)
+
+
 # Perform the pDFA
 set.seed(14) # For repeatable results; p=0.255
 pdfa_community_buildups_gombe <- pDFA.nested(test.fac="Community", contr.fac = "Caller",
                                     variables=vars_pdfa_community_buildups, 
                                     restrict.by=NULL, n.contr.fac.levels.to.sel=NULL, 
                                     n.to.sel.per.contr.fac.level=NULL, n.sel=100, n.perm=1000, 
-                                    pdfa.data=as.data.frame(pdfa_data_community_buildups_gombe))
+                                    pdfa.data=as.data.frame(pca_scores_pdfa_community_buildups_gombe))
 pdfa_community_buildups_gombe
 
 # ON COMPLETE CALLS
