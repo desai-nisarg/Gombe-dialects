@@ -1,6 +1,4 @@
-## INTRODUCTION
-
-Manuscript title: "Chimpanzee pant-hoots encode information about individual but not group differences"
+## Chimpanzee pant‐hoots encode individual information more reliably than group differences.
 
 Manuscript authors: Nisarg P. Desai, Pawel Fedurek, Katie E. Slocombe, Michael L. Wilson
 
